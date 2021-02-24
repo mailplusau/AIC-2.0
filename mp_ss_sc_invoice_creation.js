@@ -895,7 +895,6 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                     recipients: ['ankith.ravindran@mailplus.com.au', 'willian.suryadharma@mailplus.com.au'],
                                     subject: 'Invoice Creation - Customer: ' + customer_internal_id + ' cannot be Invoiced',
                                 });
-						        nlapiSendEmail(409635, , , body, null);
 					 
                             }
                         } catch(e) {
