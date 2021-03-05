@@ -772,33 +772,52 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                     });
 
                                     log.debug({ title: 'End of the Date Time search loop ', details: ctx.getRemainingUsage()});
-                                    nlapiLogExecution('DEBUG', , );
 
                                 } else if (discount_period == 2) {
 
                                     //Discount Period - per Day
-                                    nlapiLogExecution('DEBUG', 'Begining of the Package Switch - PER DAY: ', 'Package:' + package_text + '| Customer: ' + customer_text + ' | Usage: ' + ctx.getRemainingUsage());
+                                    log.debug({ title: 'Begining of the Package Switch - PER DAY: ', details: 'Package:' + package_text + '| Customer: ' + customer_text + ' | Usage: ' + ctx.getRemainingUsage()});
 
-                                    var searched_jobs2 = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_allocator_d');
+                                    var searched_jobs2 = search.load({
+                                        id: 'customsearch_job_invoicing_allocator_d',
+                                        type: 'customrecord_job'
+                                    })
 
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecord_job_customer',
+                                        operator: search.Operator.IS,
+                                        values: customer_id,
+                                    }));
 
-                                    var newFilters = new Array();
-                                    newFilters[0] = new nlobjSearchFilter('custrecord_job_customer', null, 'is', customer_id);
-                                    newFilters[1] = new nlobjSearchFilter('custrecord_job_service', null, 'anyof', service_ids);
-                                    newFilters[2] = new nlobjSearchFilter('custrecord_job_franchisee', null, 'is', customer_franchisee);
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecocustrecord_job_servicerd_job_customer',
+                                        operator: search.Operator.ANYOF,
+                                        values: service_ids,
+                                    }));
+
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecord_job_franchisee',
+                                        operator: search.Operator.IS,
+                                        values: customer_franchisee,
+                                    }));
+
+                                   
                                     if (!isNullorEmpty(date_effective)) {
-                                        newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_date_scheduled', null, 'onorafter', nlapiStringToDate(date_effective));
+                                        searched_jobs2.filters.push(search.createFilter({
+                                            name: 'custrecord_job_date_scheduled',
+                                            operator: search.Operator.ONORAFTER,
+                                            values: format.parse({value: date_effective, type: format.Type.DATE }),
+                                        }));
+
                                     }
                                     // if (invoice_incomplete == 2) {
                                     // 	newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_status', null, 'is', 3);
                                     // }
 
-                                    searched_jobs2.addFilters(newFilters);
-
-                                    var resultSet2 = searched_jobs2.runSearch();
+                                    var resultSet2 = searched_jobs2.run();
                                     var count_date = 0;
 
-                                    resultSet2.forEachResult(function(searchResult2) {
+                                    resultSet2.each(function(searchResult2) {
 
                                         // rescheduleSC();
                                         // 
@@ -806,45 +825,82 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
                                         if (usageStartPerDay <= usageThreshold) {
 
-                                            nlapiLogExecution('DEBUG', 'SWITCHing at Package: ' + package_text + ' - PER DAY for Customer: ' + customer_text + ' -->', ctx.getRemainingUsage());
+                                            log.debug({
+                                                title: 'SWITCHing at Package: ' + package_text + ' - PER DAY for Customer: ' + customer_text + ' -->',
+                                                details: ctx.getRemainingUsage()
+                                            })
 
                                             var params = {
-                                                custscript_prev_deploy_id: ctx.getDeploymentId()
+                                                custscript_prev_deploy_id: ctx.deploymentId
                                             }
 
-                                            reschedulePerDay = rescheduleScript(prevInvDeploy, adhocInvDeploy, params);
+                                            reschedulePerDay = task.create({
+                                                taskType: task.TaskType.SCHEDULED_SCRIPT,
+                                                deploymentId: adhocInvDeploy,
+                                                params: params,
+                                                scriptId: prevInvDeploy,
+                                            })
+
                                             if (reschedulePerDay == false) {
                                                 return false;
                                             }
                                         } else {
 
-                                            var date_finalised = searchResult2.getValue('custrecord_job_date_finalised', null, 'GROUP');
-                                            var count = searchResult2.getValue('internalid', null, 'COUNT');
+                                            var date_finalised = searchResult2.getValue({ name: 'custrecord_job_date_finalised', join: null, summary: search.Summary.GROUP });
+                                            var count = searchResult2.getValue({ name: 'internalid', join: null, summary: search.Summary.COUNT });
 
 
-                                            var searched_jobs3 = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_allocator');
+                                            var searched_jobs3 = search.load({
+                                                id: 'customsearch_job_invoicing_allocator',
+                                                type: 'customrecord_job'
+                                            })
 
 
-                                            var newFilters = new Array();
-                                            newFilters[0] = new nlobjSearchFilter('custrecord_job_customer', null, 'is', customer_id);
-                                            newFilters[1] = new nlobjSearchFilter('custrecord_job_date_finalised', null, 'on', nlapiStringToDate(date_finalised));
-                                            newFilters[2] = new nlobjSearchFilter('custrecord_job_service', null, 'is', service_ids);
-                                            newFilters[3] = new nlobjSearchFilter('custrecord_job_franchisee', null, 'is', customer_franchisee);
+                                            searched_jobs3.filters.push(search.createFilter({
+                                                name: 'custrecord_job_customer',
+                                                operator: search.Operator.IS,
+                                                values: customer_id,
+                                            }));
+
+                                            searched_jobs3.filters.push(search.createFilter({
+                                                name: 'custrecord_job_date_finalised',
+                                                operator: search.Operator.ON,
+                                                values: format.parse({ value: date_finalised, type: format.Type.DATE}),
+                                            }));
+
+                                            searched_jobs3.filters.push(search.createFilter({
+                                                name: 'custrecord_job_service',
+                                                operator: search.Operator.IS,
+                                                values: service_ids,
+                                            }));
+
+                                            searched_jobs3.filters.push(search.createFilter({
+                                                name: 'custrecord_job_franchisee',
+                                                operator: search.Operator.IS,
+                                                values: customer_franchisee,
+                                            }));
+
                                             if (!isNullorEmpty(date_effective)) {
-                                                newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_date_scheduled', null, 'onorafter', nlapiStringToDate(date_effective));
+                                                searched_jobs3.filters.push(search.createFilter({
+                                                    name: 'custrecord_job_date_scheduled',
+                                                    operator: search.Operator.ONORAFTER,
+                                                    values: format.parse({ value: date_finalised, type: format.Type.DATE}),
+                                                }));
+
                                             }
 
-                                            searched_jobs3.addFilters(newFilters);
-
-                                            var resultSet3 = searched_jobs3.runSearch();
+                                            var resultSet3 = searched_jobs3.run();
 
                                             var job_group_status_array = [];
                                             var job_group_invoiceable_array = [];
                                             var result_service_ids = [];
 
-                                            nlapiLogExecution('DEBUG', 'Creating Job Group ID/Status Array', ctx.getRemainingUsage());
+                                            log.debug({
+                                                title: 'Creating Job Group ID/Status Array',
+                                                details: ctx.getRemainingUsage()
+                                            })
 
-                                            resultSet3.forEachResult(function(searchResult3) {
+                                            resultSet3.each(function(searchResult3) {
 
                                                 var job_id = searchResult3.getValue('internalid');
                                                 var job_group_id = searchResult3.getValue('custrecord_job_group');
@@ -852,9 +908,12 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                                 var service_text = searchResult3.getText('custrecord_job_service');
                                                 var service_text = searchResult3.getText('custrecord_job_service');
                                                 var job_invoiceable = searchResult3.getValue('custrecord_job_invoiceable');
-                                                var job_group_status = searchResult3.getValue("custrecord_jobgroup_status", "CUSTRECORD_JOB_GROUP", null);
+                                                var job_group_status = searchResult3.getValue({ name: "custrecord_jobgroup_status", join: "CUSTRECORD_JOB_GROUP" });
 
-                                                nlapiLogExecution('AUDIT', 'Job Group ID : ' + job_group_id + ' | Status Array: ' + job_group_status, ctx.getRemainingUsage());
+                                                log.audit({
+                                                    title: 'Job Group ID : ' + job_group_id + ' | Status Array: ' + job_group_status,
+                                                    details: ctx.getRemainingUsage()
+                                                });
 
                                                 var pos = service_ids.indexOf(service_id);
 
@@ -868,7 +927,10 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                                 return true;
                                             });
 
-                                            nlapiLogExecution('DEBUG', 'End of creating Job Group ID/Status Array', ctx.getRemainingUsage());
+                                            log.debug({
+                                                title: 'End of creating Job Group ID/Status Array',
+                                                details: ctx.getRemainingUsage()
+                                            })
 
                                             result_service_ids = result_service_ids.filter(function(elem, index, self) {
                                                 return index == self.indexOf(elem);
@@ -914,68 +976,120 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
                                                         if (!isNullorEmpty(job_groups_list)) {
 
-                                                            nlapiLogExecution('DEBUG', 'Start of Allocator Jobs Loop', ctx.getRemainingUsage());
+                                                            log.debug({
+                                                                title: 'Start of Allocator Jobs Loop',
+                                                                details: ctx.getRemainingUsage()
+                                                            })
 
                                                             // Search: Job - Package Allocator - Unfiltered - DO NOT DELETE
-                                                            var searched_jobs4 = nlapiLoadSearch('customrecord_job', 'customsearch_job_pkg_allocatr_unfilterd');
+                                                            var searched_jobs4 = search.load({
+                                                                id: 'customsearch_job_pkg_allocatr_unfilterd',
+                                                                type: 'customrecord_job'
+                                                            });
 
-                                                            nlapiLogExecution('DEBUG', 'Period Type 2 | Shortest Length > 0 ', 'job_groups_list: ' + job_groups_list);
+                                                            log.debug({
+                                                                title: 'Period Type 2 | Shortest Length > 0 ',
+                                                                details: 'job_groups_list: ' + job_groups_list
+                                                            });
 
-                                                            var newFilters = new Array();
-                                                            newFilters[0] = new nlobjSearchFilter('custrecord_job_customer', null, 'is', customer_id);
-                                                            newFilters[1] = new nlobjSearchFilter('custrecord_job_group', null, 'anyof', job_groups_list);
-                                                            newFilters[2] = new nlobjSearchFilter('custrecord_job_franchisee', null, 'is', customer_franchisee);
+                                                            searched_jobs4.filters.push(search.createFilter({
+                                                                name: 'custrecord_job_customer',
+                                                                operator: search.Operator.IS,
+                                                                values: customer_id,
+                                                            }));
+
+                                                            searched_jobs4.filters.push(search.createFilter({
+                                                                name: 'custrecord_job_group',
+                                                                operator: search.Operator.ANYOF,
+                                                                values: job_groups_list,
+                                                            }));
+
+                                                            searched_jobs4.filters.push(search.createFilter({
+                                                                name: 'custrecord_job_franchisee',
+                                                                operator: search.Operator.IS,
+                                                                values: customer_franchisee,
+                                                            }));
+
                                                             if (include_extras == 2) {
-                                                                newFilters[3] = new nlobjSearchFilter('custrecord_job_service_category', null, 'is', 1);
+                                                                searched_jobs4.filters.push(search.createFilter({
+                                                                    name: 'custrecord_job_service_category',
+                                                                    operator: search.Operator.IS,
+                                                                    values: 1,
+                                                                }));
                                                             }
                                                             if (!isNullorEmpty(date_effective)) {
-                                                                newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_date_scheduled', null, 'onorafter', nlapiStringToDate(date_effective));
+                                                                searched_jobs4.filters.push(search.createFilter({
+                                                                    name: 'custrecord_job_date_scheduled',
+                                                                    operator: search.Operator.ONORAFTER,
+                                                                    values: format.parse({value: date_effective, type: format.Type.DATE }),
+                                                                }));
                                                             }
 
-                                                            searched_jobs4.addFilters(newFilters);
-
-                                                            var resultSet4 = searched_jobs4.runSearch();
+                                                            var resultSet4 = searched_jobs4.run();
 
                                                             var usageStartAllocator = ctx.getRemainingUsage();
 
                                                             if (usageStartAllocator <= usageThreshold) {
 
-                                                                nlapiLogExecution('DEBUG', 'SWITCHing at -->', 'PACKAGE PER DAY - Allocator:' + package_text + ' | Customer: ' + customer_text + ' | Job Group List: ' + job_groups_list + ' | ' + ctx.getRemainingUsage());
+                                                                log.debug({
+                                                                    title: 'SWITCHing at -->',
+                                                                    details: 'PACKAGE PER DAY - Allocator:' + package_text + ' | Customer: ' + customer_text + ' | Job Group List: ' + job_groups_list + ' | ' + ctx.getRemainingUsage()
+                                                                });
 
                                                                 var params = {
-                                                                    custscript_prev_deploy_id: ctx.getDeploymentId()
+                                                                    custscript_prev_deploy_id: ctx.deploymentId
                                                                 }
 
-                                                                rescheduleJobPackageAllocator = rescheduleScript(prevInvDeploy, adhocInvDeploy, params);
+                                                                rescheduleJobPackageAllocator = task.create({
+                                                                    taskType: task.TaskType.SCHEDULED_SCRIPT,
+                                                                    scriptId: prevInvDeploy,
+                                                                    deploymentId: adhocInvDeploy,
+                                                                    params: params
+                                                                });
+
+                                                                rescheduleJobPackageAllocator.submit();
 
                                                                 if (rescheduleJobPackageAllocator == false) {
                                                                     return false;
                                                                 }
                                                             } else {
-                                                                resultSet4.forEachResult(function(searchResult4) {
+                                                                resultSet4.each(function(searchResult4) {
 
 
                                                                     var startUsageAllocator = ctx.getRemainingUsage();
 
 
-                                                                    var job_record = nlapiLoadRecord('customrecord_job', searchResult4.getValue('internalid'));
+                                                                    var job_record = record.load({
+                                                                        type: 'customrecord_job',
+                                                                        id: searchResult4.getValue('internalid'),
+                                                                    })
 
-                                                                    job_record.setFieldValue('custrecord_job_service_package', package_id);
-                                                                    job_record.setFieldValue('custrecord_job_invoice_single_line_item', invoice_single_item);
-                                                                    job_record.setFieldValue('custrecord_job_discount_type', discount_type);
-                                                                    job_record.setFieldValues('custrecord_package_job_groups', job_groups_list);
-                                                                    job_record.setFieldValue('custrecord_package_status', final_package_status);
-                                                                    job_record.setFieldValue('custrecord_job_invoiceable', final_invoiceable);
-                                                                    job_record.setFieldValue('custrecord_job_date_allocated', getDate());
-                                                                    nlapiSubmitRecord(job_record);
+                                                                    job_record.setValue({ fieldId: 'custrecord_job_service_package', value: package_id });
+                                                                    job_record.setValue({ fieldId: 'custrecord_job_invoice_single_line_item', value: invoice_single_item });
+                                                                    job_record.setValue({ fieldId: 'custrecord_job_discount_type', value: discount_type });
+                                                                    job_record.setValue({ fieldId: 'custrecord_package_job_groups value:', job_groups_list });
+                                                                    job_record.setValue({ fieldId: 'custrecord_package_status', value: final_package_status });
+                                                                    job_record.setValue({ fieldId: 'custrecord_job_invoiceable', value: final_invoiceable });
+                                                                    job_record.setValue({ fieldId: 'custrecord_job_date_allocated', value: getDate() });
+                                                                    
+                                                                    job_record.save({
+                                                                        enableSourcing: true,
+                                                                        ignoreMandatoryFields: true
+                                                                    });
 
 
-                                                                    nlapiLogExecution('AUDIT', 'PACKAGE PER DAY - Allocator | Job ID: ' + searchResult4.getValue('internalid'), (startUsageAllocator - ctx.getRemainingUsage()));
+                                                                    log.audit({
+                                                                        title: 'PACKAGE PER DAY - Allocator | Job ID: ' + searchResult4.getValue('internalid'),
+                                                                        details: (startUsageAllocator - ctx.getRemainingUsage())
+                                                                    });
 
                                                                     return true;
                                                                 });
 
-                                                                nlapiLogExecution('DEBUG', 'End of Allocator Jobs Loop', ctx.getRemainingUsage());
+                                                                log.debug({
+                                                                    title: 'End of Allocator Jobs Loop',
+                                                                    details: ctx.getRemainingUsage()
+                                                                })
 
                                                                 job_groups_list = [];
                                                             }
@@ -1002,68 +1116,125 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
                                                     if (!isNullorEmpty(job_groups_list)) {
 
-                                                        nlapiLogExecution('DEBUG', 'Start of Allocator Jobs Loop', ctx.getRemainingUsage());
+                                                        log.debug({
+                                                            title: 'Start of Allocator Jobs Loop',
+                                                            details: ctx.getRemainingUsage()
+                                                        });
 
                                                         //Search: Job - Package Allocator - Unfiltered - DO NOT DELETE
-                                                        var searched_jobs4 = nlapiLoadSearch('customrecord_job', 'customsearch_job_pkg_allocatr_unfilterd');
+                                                        var searched_jobs4 = search.load({
+                                                            id: 'customsearch_job_pkg_allocatr_unfilterd',
+                                                            type: 'customrecord_job'
+                                                        });
 
-                                                        nlapiLogExecution('DEBUG', 'Period Type 1 | Shortest Length = 0 ', 'job_groups_list: ' + job_groups_list);
+                                                        log.debug({
+                                                            title: 'Period Type 1 | Shortest Length = 0 ',
+                                                            details: 'job_groups_list: ' + job_groups_list
+                                                        });
 
-                                                        var newFilters = new Array();
-                                                        newFilters[0] = new nlobjSearchFilter('custrecord_job_customer', null, 'is', customer_id);
-                                                        newFilters[1] = new nlobjSearchFilter('custrecord_job_group', null, 'anyof', job_groups_list);
-                                                        newFilters[2] = new nlobjSearchFilter('custrecord_job_franchisee', null, 'is', customer_franchisee);
+                                                        searched_jobs4.filters.push(search.createFilter({
+                                                            name: 'custrecord_job_customer',
+                                                            operator: search.Operator.IS,
+                                                            values: customer_id,
+                                                        }));
+
+                                                        searched_jobs4.filters.push(search.createFilter({
+                                                            name: 'custrecord_job_group',
+                                                            operator: search.Operator.ANYOF,
+                                                            values: job_groups_list,
+                                                        }));
+
+                                                        searched_jobs4.filters.push(search.createFilter({
+                                                            name: 'custrecord_job_franchisee',
+                                                            operator: search.Operator.IS,
+                                                            values: customer_franchisee,
+                                                        }));
+
+
+
+                                                       
                                                         if (include_extras == 2) {
-                                                            newFilters[3] = new nlobjSearchFilter('custrecord_job_service_category', null, 'is', 1);
+                                                            searched_jobs4.filters.push(search.createFilter({
+                                                                name: 'custrecord_job_service_category',
+                                                                operator: search.Operator.IS,
+                                                                values: 1,
+                                                            }));
+
                                                         }
                                                         if (!isNullorEmpty(date_effective)) {
-                                                            newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_date_scheduled', null, 'onorafter', nlapiStringToDate(date_effective));
+                                                            searched_jobs4.filters.push(search.createFilter({
+                                                                name: 'custrecord_job_date_scheduled',
+                                                                operator: search.Operator.ONORAFTER,
+                                                                values: format.parse({ value: date_effective, type: format.Type.DATE }),
+                                                            }));
+
                                                         }
 
-                                                        searched_jobs4.addFilters(newFilters);
-
-                                                        var resultSet4 = searched_jobs4.runSearch();
+                                                        var resultSet4 = searched_jobs4.run();
 
                                                         var usageStartAllocator = ctx.getRemainingUsage();
 
                                                         if (usageStartAllocator <= usageThreshold) {
 
-                                                            nlapiLogExecution('DEBUG', 'SWITCHing at -->', 'PACKAGE PER DAY - Allocator:' + package_text + ' | Customer: ' + customer_text + ' | Job Group List: ' + job_groups_list + ' | ' + ctx.getRemainingUsage());
+                                                            log.debug({
+                                                                title: 'SWITCHing at -->',
+                                                                details: 'PACKAGE PER DAY - Allocator:' + package_text + ' | Customer: ' + customer_text + ' | Job Group List: ' + job_groups_list + ' | ' + ctx.getRemainingUsage()
+                                                            })
 
                                                             var params = {
-                                                                custscript_prev_deploy_id: ctx.getDeploymentId()
+                                                                custscript_prev_deploy_id: ctx.deploymentId
                                                             }
 
-                                                            rescheduleJobPackageAllocator = rescheduleScript(prevInvDeploy, adhocInvDeploy, params);
+                                                            rescheduleJobPackageAllocator = task.create({
+                                                                taskType: task.TaskType.SCHEDULED_SCRIPT,
+                                                                scriptId: prevInvDeploy,
+                                                                deploymentId: adhocInvDeploy,
+                                                                params: params
+                                                            });
+
+                                                            rescheduleJobPackageAllocator.submit();
 
                                                             if (rescheduleJobPackageAllocator == false) {
                                                                 return false;
                                                             }
                                                         } else {
-                                                            resultSet4.forEachResult(function(searchResult4) {
+                                                            resultSet4.each(function(searchResult4) {
 
 
                                                                 var startUsageAllocator = ctx.getRemainingUsage();
 
 
-                                                                var job_record = nlapiLoadRecord('customrecord_job', searchResult4.getValue('internalid'));
-
-                                                                job_record.setFieldValue('custrecord_job_service_package', package_id);
-                                                                job_record.setFieldValue('custrecord_job_invoice_single_line_item', invoice_single_item);
-                                                                job_record.setFieldValue('custrecord_job_discount_type', discount_type);
-                                                                job_record.setFieldValues('custrecord_package_job_groups', job_groups_list);
-                                                                job_record.setFieldValue('custrecord_package_status', final_package_status);
-                                                                job_record.setFieldValue('custrecord_job_invoiceable', final_invoiceable);
-                                                                job_record.setFieldValue('custrecord_job_date_allocated', getDate());
-                                                                nlapiSubmitRecord(job_record);
+                                                                var job_record = record.load({
+                                                                    type: 'customrecord_job',
+                                                                    id: searchResult4.getValue('internalid'),
+                                                                });
 
 
-                                                                nlapiLogExecution('AUDIT', 'PACKAGE PER DAY - Allocator | Job ID: ' + searchResult4.getValue('internalid'), (startUsageAllocator - ctx.getRemainingUsage()));
+                                                                job_record.setValue({ fieldId: 'custrecord_job_service_package', value: package_id });
+                                                                job_record.setValue({ fieldId: 'custrecord_job_invoice_single_line_item', value: invoice_single_item });
+                                                                job_record.setValue({ fieldId: 'custrecord_job_discount_type', value: discount_type });
+                                                                job_record.setValue({ fieldId: 'custrecord_package_job_groups', value: job_groups_list });
+                                                                job_record.setValue({ fieldId: 'custrecord_package_status', value: final_package_status });
+                                                                job_record.setValue({ fieldId: 'custrecord_job_invoiceable', value: final_invoiceable });
+                                                                job_record.setValue({ fieldId: 'custrecord_job_date_allocated', value: getDate() });
+                                                                job_record.save({
+                                                                    enableSourcing: true,
+                                                                    ignoreMandatoryFields: true
+                                                                })
+
+
+                                                                log.audit({
+                                                                    title: 'PACKAGE PER DAY - Allocator | Job ID: ' + searchResult4.getValue('internalid'),
+                                                                    details: (startUsageAllocator - ctx.getRemainingUsage())
+                                                                })
 
                                                                 return true;
                                                             });
 
-                                                            nlapiLogExecution('DEBUG', 'End of Allocator Jobs Loop', ctx.getRemainingUsage());
+                                                            log.debug({
+                                                                title: 'End of Allocator Jobs Loop',
+                                                                details: ctx.getRemainingUsage()
+                                                            })
 
                                                             job_groups_list = [];
                                                         }
@@ -1081,7 +1252,10 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                                     }
 
                                                     count_date++;
-                                                    nlapiLogExecution('DEBUG', 'Usage end of (' + count_date + ') Date loop', 'For Services: ' + service_names + ' | Package: ' + package_text + ' | For Customer: ' + customer_text + ' | Usage: ' + (usageStartPerDay - ctx.getRemainingUsage()));
+                                                    log.debug({
+                                                        title: 'Usage end of (' + count_date + ') Date loop',
+                                                        details: 'For Services: ' + service_names + ' | Package: ' + package_text + ' | For Customer: ' + customer_text + ' | Usage: ' + (usageStartPerDay - ctx.getRemainingUsage())
+                                                    })
 
                                                     return true;
                                                 }
@@ -1091,11 +1265,17 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                         }
                                     });
 
-                                    nlapiLogExecution('DEBUG', 'End of the Date search loop ', ctx.getRemainingUsage());
+                                    log.debug({
+                                        title: 'End of the Date search loop ',
+                                        details: ctx.getRemainingUsage()
+                                    })
                                 } else if (discount_period == 3) {
                                     //Discount Period - Monthly 
 
-                                    nlapiLogExecution('DEBUG', 'Begining of the Package: ' + package_text + ' - MONTHLY switch for Customer: ' + customer_text, ctx.getRemainingUsage());
+                                    log.debug({
+                                        title: 'Begining of the Package: ' + package_text + ' - MONTHLY switch for Customer: ' + customer_text,
+                                        details: ctx.getRemainingUsage()
+                                    })
 
                                     var date = new Date();
 
@@ -1118,41 +1298,87 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
 
 
-                                    var searched_jobs2 = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_allocator');
+                                    var searched_jobs2 = search.load({
+                                        id: 'customsearch_job_invoicing_allocator',
+                                        type: 'customrecord_job'
+                                    })
 
-                                    var newFilters = new Array();
-                                    newFilters[0] = new nlobjSearchFilter('custrecord_job_customer', null, 'is', customer_id);
-                                    newFilters[1] = new nlobjSearchFilter('custrecord_job_service', null, 'is', service_ids);
-                                    newFilters[2] = new nlobjSearchFilter('custrecord_job_date_finalised', null, 'within', firstDay, lastDay);
-                                    newFilters[3] = new nlobjSearchFilter('custrecord_job_franchisee', null, 'is', customer_franchisee);
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecord_job_customer',
+                                        operator: search.Operator.IS,
+                                        values: customer_id,
+                                    }));
+
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecord_job_service',
+                                        operator: search.Operator.IS,
+                                        values: service_ids,
+                                    }));
+
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecord_job_date_finalised',
+                                        operator: search.Operator.WITHIN,
+                                        values: [firstDay, lastDay],
+                                    }));
+
+                                    searched_jobs2.filters.push(search.createFilter({
+                                        name: 'custrecord_job_franchisee',
+                                        operator: search.Operator.IS,
+                                        values: customer_franchisee,
+                                    }));
+
                                     if (include_extras == 2) {
-                                        newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_service_category', null, 'is', 1);
+                                        searched_jobs2.filters.push(search.createFilter({
+                                            name: 'custrecord_job_service_category',
+                                            operator: search.Operator.IS,
+                                            values: 1,
+                                        }));
                                     }
                                     if (!isNullorEmpty(date_effective)) {
-                                        newFilters[newFilters.length] = new nlobjSearchFilter('custrecord_job_date_scheduled', null, 'onorafter', nlapiStringToDate(date_effective));
+                                        searched_jobs2.filters.push(search.createFilter({
+                                            name: 'custrecord_job_date_scheduled',
+                                            operator: search.Operator.ONORAFTER,
+                                            values: format.parse({value: date_effective, type: format.Type.DATE }),
+                                        }));
+
                                     }
 
+                                    var resultSet2 = searched_jobs2.run();
 
-                                    searched_jobs2.addFilters(newFilters);
-
-                                    var resultSet2 = searched_jobs2.runSearch();
-
-                                    resultSet2.forEachResult(function(searchResult2) {
+                                    resultSet2.each(function(searchResult2) {
 
                                         var usageStartMonthly = ctx.getRemainingUsage();
 
                                         if (usageStartMonthly <= usageThreshold) {
 
-                                            nlapiLogExecution('DEBUG', 'SWITCHing at Package: ' + package_text + ' - MONTHLY for Customer: ' + customer_text + ' -->', ctx.getRemainingUsage());
+                                            log.debug({
+                                                title: 'SWITCHing at Package: ' + package_text + ' - MONTHLY for Customer: ' + customer_text + ' -->',
+                                                details: ctx.getRemainingUsage()
+                                            });
 
-                                            nlapiLogExecution('DEBUG', 'test', ctx.getDeploymentId());
+                                            log.debug({
+                                                title: 'test',
+                                                details: ctx.deploymentId
+                                            })
+
 
                                             var params = {
-                                                custscript_prev_deploy_id: ctx.getDeploymentId()
+                                                custscript_prev_deploy_id: ctx.deploymentId
                                             }
 
-                                            rescheduleMonthly = rescheduleScript(prevInvDeploy, adhocInvDeploy, params);
-                                            nlapiLogExecution('DEBUG', 'rescheduleMonthly', rescheduleMonthly);
+                                            rescheduleMonthly = task.create({
+                                                taskType: task.TaskType.SCHEDULED_SCRIPT,
+                                                scriptId: prevInvDeploy,
+                                                deploymentId: adhocInvDeploy,
+                                                params: params
+                                            });
+                                            
+                                            rescheduleMonthly.submit();
+                                            
+                                            log.debug({
+                                                title: 'rescheduleMonthly',
+                                                details: rescheduleMonthly
+                                            })
 
                                             if (rescheduleMonthly == false) {
                                                 return false;
@@ -1161,23 +1387,35 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                             var job_group_id = searchResult2.getValue('custrecord_job_group');
 
 
-                                            var job_record = nlapiLoadRecord('customrecord_job', searchResult2.getValue('internalid'));
+                                            var job_record = record.load({
+                                                type: 'customrecord_job',
+                                                id: searchResult2.getValue('internalid'),
+                                            })
 
-                                            job_record.setFieldValue('custrecord_job_service_package', package_id);
-                                            job_record.setFieldValue('custrecord_job_invoice_single_line_item', invoice_single_item);
-                                            job_record.setFieldValue('custrecord_job_discount_type', discount_type);
-                                            job_record.setFieldValue('custrecord_job_date_allocated', getDate());
+                                            job_record.setValue({ fieldId: 'custrecord_job_service_package', value: package_id });
+                                            job_record.setValue({ fieldId: 'custrecord_job_invoice_single_line_item', value: invoice_single_item });
+                                            job_record.setValue({ fieldId: 'custrecord_job_discount_type', value: discount_type });
+                                            job_record.setValue({ fieldId: 'custrecord_job_date_allocated', value: getDate() });
 
-                                            nlapiSubmitRecord(job_record);
+                                            job_record.save({
+                                                enableSourcing: true,
+                                                ignoreMandatoryFields: true
+                                            })
 
-                                            nlapiLogExecution('DEBUG', 'PACKAGE MONTHLY - Allocator | Job ID: ' + searchResult2.getValue('internalid'), (usageStartMonthly - ctx.getRemainingUsage()));
+                                            log.debug({
+                                                title: 'PACKAGE MONTHLY - Allocator | Job ID: ' + searchResult2.getValue('internalid'),
+                                                details: (usageStartMonthly - ctx.getRemainingUsage())
+                                            })
 
                                             return true;
                                         }
 
                                     });
 
-                                    nlapiLogExecution('DEBUG', 'End of the Allocator search loop for Package: ' + package_text + ' - MONTHLY for Customer: ' + customer_text, ctx.getRemainingUsage());
+                                    log.debug({
+                                        title: 'End of the Allocator search loop for Package: ' + package_text + ' - MONTHLY for Customer: ' + customer_text,
+                                        details: ctx.getRemainingUsage()
+                                    })
                                 }
 
                                 count_package++;
@@ -1185,7 +1423,11 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                 if (reschedulePerVisit == false || reschedulePerDay == false || rescheduleMonthly == false || rescheduleJobPackageAllocator == false) {
                                     return false;
                                 } else {
-                                    nlapiLogExecution('DEBUG', 'Usage at the end of (' + count_package + ') Package: ' + package_text + ' for (' + count_customer + ') Customer: ' + customer_text, (usageStartPackage - ctx.getRemainingUsage()));
+                                    log.debug({
+                                        title: 'Usage at the end of (' + count_package + ') Package: ' + package_text + ' for (' + count_customer + ') Customer: ' + customer_text,
+                                        details: (usageStartPackage - ctx.getRemainingUsage())
+                                    })
+
                                     return true;
                                 }
                             } else {
@@ -1196,45 +1438,81 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                         if (reschedulePerVisit == false || reschedulePerDay == false || rescheduleMonthly == false || rescheduleJobPackageAllocator == false) {
                             return false;
                         } else {
-                            nlapiLogExecution('DEBUG', 'End of the Package search loop ', ctx.getRemainingUsage());
+                            log.debug({
+                                title: 'End of the Package search loop ',
+                                details: ctx.getRemainingUsage()
+                            })
 
-                            var searched_jobs2 = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_allocator');
+                            var searched_jobs2 = search.load({
+                                id: 'customsearch_job_invoicing_allocator',
+                                type: 'customrecord_job'
+                            });
 
-                            var newFilters = new Array();
-                            newFilters[0] = new nlobjSearchFilter('custrecord_job_customer', null, 'is', customer_id);
-                            newFilters[1] = new nlobjSearchFilter('custrecord_job_franchisee', null, 'is', customer_franchisee);
 
-                            searched_jobs2.addFilters(newFilters);
 
-                            var resultSet2 = searched_jobs2.runSearch();
+                            searched_jobs2.filters.push(search.createFilter({
+                                name: 'custrecord_job_customer',
+                                operator: search.Operator.IS,
+                                values: customer_id,
+                            }));
+
+                            searched_jobs2.filters.push(search.createFilter({
+                                name: 'custrecord_job_franchisee',
+                                operator: search.Operator.IS,
+                                values: customer_franchisee,
+                            }));
+
+                            
+
+                            var resultSet2 = searched_jobs2.run();
 
                             var usageStartDateAllocated = ctx.getRemainingUsage();
                             var count_date_allocated_jobs = 0;
 
-                            nlapiLogExecution('DEBUG', 'Start of Assigning Date Allocated Loop for Customer: ' + customer_text, ctx.getRemainingUsage());
+                            log.debug({
+                                title: 'Start of Assigning Date Allocated Loop for Customer: ' + customer_text,
+                                details: ctx.getRemainingUsage()
+                            })
 
-                            resultSet2.forEachResult(function(searchResult2) {
+                            resultSet2.each(function(searchResult2) {
 
                                 var usageStartPerDay = ctx.getRemainingUsage();
 
                                 if (usageStartPerDay <= usageThreshold) {
 
-                                    nlapiLogExecution('DEBUG', 'SWITCHing at Assigning Date Allocated for Customer: ' + customer_text + ' -->', ctx.getRemainingUsage());
+                                    log.debug({
+                                        title: 'SWITCHing at Assigning Date Allocated for Customer: ' + customer_text + ' -->',
+                                        details: ctx.getRemainingUsage()
+                                    })
 
                                     var params = {
-                                        custscript_prev_deploy_id: ctx.getDeploymentId()
+                                        custscript_prev_deploy_id: ctx.deploymentId
                                     }
 
-                                    rescheduleJobAllocator = rescheduleScript(prevInvDeploy, adhocInvDeploy, params);
+                                    rescheduleJobAllocator = task.create({
+                                        taskType: task.TaskType.SCHEDULED_SCRIPT,
+                                        scriptId: prevInvDeploy,
+                                        deploymentId: adhocInvDeploy,
+                                        params: params
+                                    });
+                                    
+
                                     if (rescheduleJobAllocator == false) {
                                         return false;
                                     }
                                 } else {
-                                    var job_record = nlapiLoadRecord('customrecord_job', searchResult2.getValue('internalid'));
+                                    var job_record = record.load({
+                                        type: 'customrecord_job',
+                                        id: searchResult2.getValue('internalid'),
+                                    });
+                                    
 
-                                    job_record.setFieldValue('custrecord_job_date_allocated', getDate());
+                                    job_record.setValue({ fieldId: 'custrecord_job_date_allocated', value: getDate() });
 
-                                    nlapiSubmitRecord(job_record);
+                                    job_record.save({
+                                        enableSourcing: true,
+                                        ignoreMandatoryFields: true
+                                    });
 
                                     count_date_allocated_jobs++;
                                     return true;
@@ -1244,17 +1522,26 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                             if (rescheduleJobAllocator == false) {
                                 return false;
                             } else {
-                                nlapiLogExecution('DEBUG', 'Usage End of the Assigning Date Allocated Loop', 'For Customer:' + customer_text + '| No. of Jobs:' + count_date_allocated_jobs + ' | Usage' + (usageStartDateAllocated - ctx.getRemainingUsage()));
+                                log.debug({
+                                    title: 'Usage End of the Assigning Date Allocated Loop',
+                                    details: 'For Customer:' + customer_text + '| No. of Jobs:' + count_date_allocated_jobs + ' | Usage' + (usageStartDateAllocated - ctx.getRemainingUsage())
+                                })
 
                                 count_customer++;
 
-                                nlapiLogExecution('DEBUG', 'Usage at the end of (' + count_customer + ') Customer: ' + customer_text, (usageStartCustomer - ctx.getRemainingUsage()));
+                                log.debug({
+                                    title: 'Usage at the end of (' + count_customer + ') Customer: ' + customer_text,
+                                    details: (usageStartCustomer - ctx.getRemainingUsage())
+                                })
 
                                 return true;
                             }
                         }
                     } else {
-                        nlapiLogExecution('DEBUG', 'END --> Customer: ' + customer_id + ' present in Job - Invoicing Review - Invoiceable Discrepancies', ctx.getRemainingUsage());
+                        log.debug({
+                            title: 'END --> Customer: ' + customer_id + ' present in Job - Invoicing Review - Invoiceable Discrepancies',
+                            details: ctx.getRemainingUsage()
+                        })
 
                         return true;
                     }
@@ -1262,6 +1549,147 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                     return true;
                 }
             });
+
+            log.debug({
+                title: 'End of the Customer allocator search loop ',
+                details: ctx.getRemainingUsage()
+            })
+
+        }
+
+        function getDate() {
+            var date = new Date();
+            if (date.getHours() > 6) {
+                date.setHours(date.getHours() + 1);
+            }        
+            
+            date = format.format({
+                value: date,
+                type: format.Type.DATE
+            })
+        
+            return date;
+
+        }
+
+        /*
+            To set the Package Status on each Job based on the combination.
+            Expected Package Status				
+                                        |Job Group Status|
+            -----------------------------------------------------------------
+            |Job Group Status|	Completed	Incomplete	Scheduled	Partial
+            -----------------------------------------------------------------
+            Completed			Completed	Partial		Partial		Partial
+            Incomplete			Partial		Incomplete	Incomplete	Partial
+            Scheduled			Partial		Incomplete	Scheduled	Partial
+            Partial				Partial		Partial		Partial		Partial
+            -----------------------------------------------------------------
+        */
+        function getPackageStatus(final_package_status, status) {
+
+            if (final_package_status == null) {
+                final_package_status = status;
+            } else {
+                if (final_package_status == status) {
+                    final_package_status == status;
+                } else if (final_package_status == 1 && (status == 2 || status == 3 || status == 4)) {
+                    final_package_status == 2;
+                } else if (final_package_status == 2 && (status == 1 || status == 3 || status == 4)) {
+                    final_package_status == 2
+                } else if (final_package_status == 3) {
+                    if (status == 3 || status == 4) {
+                        final_package_status = 4;
+                    } else {
+                        final_package_status = 2;
+                    }
+                } else if (final_package_status == 4) {
+                    if (status == 1 || status == 2) {
+                        final_package_status = 2;
+                    } else {
+                        final_package_status = 3;
+                    }
+                }
+            }
+
+            return final_package_status;
+        }
+
+        /*
+            To get the Invoiceable Field set for the Jobs linked to the package
+        */
+        function getPackageInvoiceable(final_invoiceable, status, invoiceable) {
+
+            if (invoiceable_check == false) {
+                if (final_invoiceable == null) {
+                    if (status == 1 && invoiceable == 2) {
+                        final_invoiceable = 2;
+                        invoiceable_check = true;
+                        return final_invoiceable;
+                    } else {
+                        final_invoiceable = invoiceable;
+                    }
+
+                } else {
+                    if (status == 1 && invoiceable == 2) {
+                        final_invoiceable = 2;
+                        invoiceable_check = true;
+                        return final_invoiceable;
+                    } else {
+                        if (status == 1 && invoiceable == 1 && final_invoiceable == 1) {
+                            final_invoiceable == 1;
+                        } else if (status == 3 || status == 2 || status == 4) {
+                            if (invoiceable == 1 && final_invoiceable == 1) {
+                                final_invoiceable == 1;
+                            } else if (invoiceable == 2 && final_invoiceable == 2) {
+                                final_invoiceable == 2;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            return final_invoiceable;
+        }
+
+        /*
+            Reschedule the Package Allcator Schedule Script
+        */
+        function rescheduleSC(usageStart) {
+
+            if (usageStart <= usageThreshold) {
+
+                log.debug({
+                    title: 'SWITCHing -->',
+                    details: ctx.getRemainingUsage()
+                });
+
+                var params = {
+                    custscript_prev_deploy_id: ctx.deploymentId
+                }
+
+                var reschedule = task.create({
+                    taskType: task.TaskType.SCHEDULED_SCRIPT,
+                    scriptId: prevInvDeploy,
+                    deploymentId: adhocInvDeploy,
+                    params: params
+                });
+
+                reschedule.submit();
+                if (reschedule == false) {
+                    return false;
+                }
+            }
+        }
+
+        function cleanArray(actual) {
+            var newArray = new Array();
+            for (var i = 0; i < actual.length; i++) {
+                if (actual[i]) {
+                    newArray.push(actual[i]);
+                }
+            }
+            return newArray;
         }
 
         function isNullorEmpty(strVal) {

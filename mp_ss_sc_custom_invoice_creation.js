@@ -244,7 +244,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
         function getDate() {
             var date = new Date();
-            date.setHours(date.getHours() + 17);
+            date.setHours(date.getHours() + 1);
             date = format.format({
                 value: date,
                 type: format.Type.DATE
