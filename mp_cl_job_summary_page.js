@@ -10,7 +10,7 @@
 
 define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/email', 'N/currentRecord'],
     function(error, runtime, search, url, record, format, email, currentRecord) {
-        var baseURL = 'https://1048144.app.netsuite.com';
+        var baseURL = 'https://1048144-sb3.app.netsuite.com';
         if (runtime.EnvType == "SANDBOX") {
             baseURL = 'https://1048144-sb3.app.netsuite.com';
         }
@@ -19,7 +19,25 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
         /**
          * On page initialisation
          */
+        var tableSet = [];
         function pageInit() {
+            var dataTable = $('#stockcount').DataTable({
+                data: tableSet,
+                columns: [
+                    { title: 'ID'}, //0
+                    { title: 'CUSTOMER NAME'}, //1
+                    { title: 'ACTION'}, //2
+                    { title: 'EXPECTED INVOICE'}, // 3
+                    { title: 'EXPECTED DISTRIBUTION'}, // 4 
+                    { title: 'LINK TO INVOICE'}, // 5
+                ],
+                columnDefs: [{
+                        targets: [0],
+                        className: 'bolded'
+                    }
+                ],
+                order: [[1, "asc"]],
+            });
             var currentScript = currentRecord.get();
             $(window).load(function() {
                 // Animate loader off screen
@@ -29,37 +47,39 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             $(document).on("change", ".zee_dropdown", function(e) {
 
                 var zee = $(this).val();
+                console.log(zee);
                 var valueMonth = checkMonth();
-            
+                console.log(zee);
                 dates = service_start_end_date(valueMonth);
+                console.log(zee);
+                currentScript.setValue({ fieldId: 'start_date', value: dates[0] });
+                currentScript.setValue({ fieldId: 'end_date', value: dates[1] });
             
-                currentScript.getValue({ fieldId: 'start_date', value: dates[0] });
-                currentScript.getValue({ fieldId: 'end_date', value: dates[1] });
+                console.log(zee);
             
-            
-                var url = baseURL + "/app/site/hosting/scriptlet.nl?script=592&deploy=1&compid=1048144&sorts[customername]=1";
-                if (runtime.EnvType == "SANDBOX") {
-                    var url = baseURL + "/app/site/hosting/scriptlet.nl?script=592&deploy=1&sorts[customername]=1";
-                }
+                // var url = baseURL + "/app/site/hosting/scriptlet.nl?script=1191&deploy=1&compid=1048144&sorts[customername]=1";
+                // if (runtime.EnvType == "SANDBOX") {
+                    var url = "https://1048144-sb3.app.netsuite.com/app/site/hosting/scriptlet.nl?script=1191&deploy=1&sorts[customername]=1";
+                //}
                 url += "&start_date=" + dates[0] + "&end_date=" + dates[1] + "&zee=" + zee + "";
             
                 window.location.href = url;
             });
 
-            AddStyle('https://1048144.app.netsuite.com/core/media/media.nl?id=1988776&c=1048144&h=58352d0b4544df20b40f&_xt=.css', 'head');
+            //AddStyle('https://1048144.app.netsuite.com/core/media/media.nl?id=1988776&c=1048144&h=58352d0b4544df20b40f&_xt=.css', 'head');
 
 
             //JQuery to sort table based on click of header. Attached library  
-            jQuery(document).ready(function() {
-                jQuery("#stockcount").bind('dynatable:init', function(e, dynatable) {
-                    dynatable.sorts.clear();
-                    dynatable.sorts.add('customername', 1); // 1=ASCENDING, -1=DESCENDING
-                    dynatable.process();
-                    e.preventDefault();
-                }).dynatable();
+            $(document).ready(function() {
+                var datatable = $('#stockcount').DataTable();
+                datatable.clear();
+                datatable.rows.add('customername');
+                datatable.draw();
 
-                jQuery('.edit_customer').closest("tr").addClass("dynatable-complete");
-                jQuery('.review_customer').closest("tr").addClass("dynatable-incomplete");
+               
+
+                // $('.edit_customer').closest("tr").addClass("dynatable-complete");
+                // $('.review_customer').closest("tr").addClass("dynatable-incomplete");
 
             });
             var mainTable = document.getElementsByClassName("uir-outside-fields-table");
@@ -70,14 +90,14 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             //     mainTable[i].style.width = "50%";
             // }
 
-            for (var i = 0; i < mainTable2.length; i++) {
-                mainTable2[i].style.position = "absolute";
-                mainTable2[i].style.left = "10%";
-                mainTable2[i].style.width = "80%";
-                mainTable2[i].style.top = "580px";
-            }
+            // for (var i = 0; i < mainTable2.length; i++) {
+            //     mainTable2[i].style.position = "absolute";
+            //     mainTable2[i].style.left = "10%";
+            //     mainTable2[i].style.width = "80%";
+            //     mainTable2[i].style.top = "580px";
+            // }
 
-            $('.dynatable-sort-header').css("color", "white");
+            //$('.dynatable-sort-header').css("color", "white");
             $('.invoice_customer').css("font-weight", "bold");
 
             if (!isNullorEmpty(document.getElementById('tr_submitter'))) {
@@ -107,20 +127,32 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             // Get the offset position of the navbar
             var sticky = header.offsetTop;
 
-            $(document).on('click', '.instruction_button', function(e) {
+            // $(document).on('click', '.instruction_button', function(e) {
 
-                var mainTable2 = document.getElementsByClassName("uir-inline-tag");
-                for (var i = 0; i < mainTable2.length; i++) {
-                    mainTable2[i].style.position = "absolute";
-                    mainTable2[i].style.left = "10%";
-                    mainTable2[i].style.width = "80%";
-                    mainTable2[i].style.top = "860px";
-                }
+            //     var mainTable2 = document.getElementsByClassName("uir-inline-tag");
+            //     for (var i = 0; i < mainTable2.length; i++) {
+            //         mainTable2[i].style.position = "absolute";
+            //         mainTable2[i].style.left = "10%";
+            //         mainTable2[i].style.width = "80%";
+            //         mainTable2[i].style.top = "860px";
+            //     }
             
-                $('.admin_section').css("top", "500px");
-                $('.instruction_button').hide();
-            });
+            //     $('.admin_section').css("top", "500px");
+            //     //$('.instruction_button').hide();
+            // });
             
+            $('.collapse').on('shown.bs.collapse', function() {
+                $("#stockcount").css("padding-top", "500px");
+                $(".admin_section").css("padding-top","500px");
+
+                
+            })
+            
+            $('.collapse').on('hide.bs.collapse', function() {
+                $("#stockcount").css("padding-top", "0px");
+                $(".admin_section").css("padding-top","0px");
+            })
+
             /**
              * [description] - On change of Invoicing MOnth, page reloaded with the cosen month of jobs
              */
@@ -141,9 +173,9 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
                     currentScript.setValue({ fieldId: 'start_date', value: dates[0] });
                     currentScript.setValue({ fieldId: 'end_date', value: dates[1] });
             
-                    var url = baseURL + "/app/site/hosting/scriptlet.nl?script=592&deploy=1&compid=1048144&sorts[customername]=1";
+                    var url = baseURL + "/app/site/hosting/scriptlet.nl?script=1191&deploy=1&compid=1048144&sorts[customername]=1";
                     if (runtime.EnvType == "SANDBOX") {
-                        var url = baseURL + "/app/site/hosting/scriptlet.nl?script=592&deploy=1&sorts[customername]=1";
+                        var url = baseURL + "/app/site/hosting/scriptlet.nl?script=1191&deploy=1&sorts[customername]=1";
                     }
             
                     url += "&start_date=" + dates[0] + "&end_date=" + dates[1] + "&zee=" + zee;
@@ -336,6 +368,34 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             tag.appendChild(addLink);
         }
 
+        /**
+         * [service_start_end_date description] - To get the start and end date of the month
+         * @param  {string} date_finalised Date string is passed as argument
+         * @return {Array} returns array of the start and end date of the month
+         */
+        function service_start_end_date(date_finalised) {
+
+            var split_date = date_finalised.split('-');
+
+
+            var date = new Date();
+            var firstDay = new Date(parseInt(split_date[0]), parseInt(split_date[1]) - 1, 1);
+            var lastDay = new Date(parseInt(split_date[0]), split_date[1], 0);
+
+            var service_range = [];
+
+            service_range[0] = format.format({
+                value: firstDay,
+                type: format.Type.DATE
+            });
+            service_range[1] = format.format({
+                value: lastDay,
+                type: format.Type.DATE
+            });
+
+            return service_range;
+
+        }
         function isNullorEmpty(strVal) {
             return (strVal == null || strVal == '' || strVal == 'null' || strVal == undefined || strVal == 'undefined' || strVal == '- None -');
         }

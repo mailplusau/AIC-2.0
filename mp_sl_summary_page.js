@@ -61,10 +61,12 @@
             inlinehtml2 += '<script src="https://1048144.app.netsuite.com/core/media/media.nl?id=2060797&c=1048144&h=ef2cda20731d146b5e98&_xt=.js"></script>';
             inlinehtml2 += '<link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css">';
 
-            inlinehtml2 += '<div class="se-pre-con"></div><button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo">Click for Instructions</button><div id="demo" style="background-color: #cfeefc !important;border: 1px solid #417ed9;padding: 10px 10px 10px 20px;width:96%;position:absolute" class="collapse"><b><u>Important Instructions:</u></b><ul><li>Click headers to sort. Hold <b><i>"Shift"</i></b> and click another column to sort according to multiple columns.</li><li>Can search for specific customer by typing into the Search bar</li><li><input class="btn-xs btn-default" type="button" value="START REVIEW" disabled> - Click to <b>Start</b> the Invoice Review for the Customer</li><li><input class="btn-xs btn-default" type="button" value="CONTINUE REVIEW" disabled> - Click to <b>Continue</b> the Invoice Review Pro';
-            inlinehtml2 += 'cess</li><li><input class="btn-xs btn-primary" type="button" value="FINALISE" disabled> - Click when all the Customer\'s Invoice has been reviewed and its ready for Invoicing</li><li><b>ACTIONS</b> reveals the stage of the review process for each customer: <ul><li><input class="btn-xs btn-danger" type="button" value="REVIEW" disabled> - New <b>activities</b> from Mailplus GO app are available for review.</li><li><input class="btn-xs btn-primary" type="button" value="EDIT" disabled> - All <b>activities</b> from Mailplus GO app are reviewed, up-to-date and can be edited.</li><li><input class="btn-xs btn-info" type="button" value="FINALISED" disabled> <small><b>(LOCKED)</b></small> - All activities from Mailplus GO app are finalised for invoicing</li></li><li><input class="btn-xs btn-success active" type="button" value="INVOICED" disable';
-            inlinehtml2 += 'd> <small><b>(LOCKED)</b></small> - Invoice has been automatically created using activities from Mailplus GO app. </li><li><input class="btn-xs btn btn-default" type="button" value="CUSTOM INVOICE" disabled> <small><b>(LOCKED)</b></small> - Invoice has been generated without the use of activities from Mailplus GO app.</ul></li></ul></div>';
-            inlinehtml2 += '<div class="col-xs-4 admin_section" style="width: 20%;left: 40%;position: absolute;"><label class="control-label">Invoicing Month <span class="glyphicon glyphicon-asterisk" style="font-size: 5px;top: -5px;color: red;"></span></label>';
+            //inlinehtml2 += '<div class="se-pre-con"></div>
+            // inlinehtml2 += '<button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo">Click for Instructions</button><div id="demo" style="background-color: #cfeefc !important;border: 1px solid #417ed9;padding: 10px 10px 10px 20px;width:96%;position:absolute" class="collapse">';
+            // inlinehtml2 += '<b><u>Important Instructions:</u></b><ul><li>Click headers to sort. Hold <b><i>"Shift"</i></b> and click another column to sort according to multiple columns.</li><li>Can search for specific customer by typing into the Search bar</li><li><input class="btn-xs btn-default" type="button" value="START REVIEW" disabled> - Click to <b>Start</b> the Invoice Review for the Customer</li><li><input class="btn-xs btn-default" type="button" value="CONTINUE REVIEW" disabled> - Click to <b>Continue</b> the Invoice Review Pro';
+            // inlinehtml2 += 'cess</li><li><input class="btn-xs btn-primary" type="button" value="FINALISE" disabled> - Click when all the Customer\'s Invoice has been reviewed and its ready for Invoicing</li><li><b>ACTIONS</b> reveals the stage of the review process for each customer: <ul><li><input class="btn-xs btn-danger" type="button" value="REVIEW" disabled> - New <b>activities</b> from Mailplus GO app are available for review.</li><li><input class="btn-xs btn-primary" type="button" value="EDIT" disabled> - All <b>activities</b> from Mailplus GO app are reviewed, up-to-date and can be edited.</li><li><input class="btn-xs btn-info" type="button" value="FINALISED" disabled> <small><b>(LOCKED)</b></small> - All activities from Mailplus GO app are finalised for invoicing</li></li><li><input class="btn-xs btn-success active" type="button" value="INVOICED" disable';
+            // inlinehtml2 += 'd> <small><b>(LOCKED)</b></small> - Invoice has been automatically created using activities from Mailplus GO app. </li><li><input class="btn-xs btn btn-default" type="button" value="CUSTOM INVOICE" disabled> <small><b>(LOCKED)</b></small> - Invoice has been generated without the use of activities from Mailplus GO app.</ul></li></ul></div>';
+            // inlinehtml2 += '<div class="col-xs-4 admin_section" style="width: 20%;left: 40%;position: absolute;"><label class="control-label">Invoicing Month <span class="glyphicon glyphicon-asterisk" style="font-size: 5px;top: -5px;color: red;"></span></label>';
 
             var result = finalise_date();
 
@@ -189,8 +191,20 @@
             inlineQty += '<link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css">';
 
 
-            inlineQty += '<div><style>table#stockcount {font-size:12px; font-weight:bold; text-align:center; border-color: #24385b;} </style><table border="0" cellpadding="10" id="stockcount" cellspacing="0" class="table table-responsive table-striped"><thead style="color: white;background-color: #607799;"><tr><td style="text-align:left;"><b>ID</b></td><td style="text-align:left;" class="col-sm-3"><b>CUSTOMER NAME</b></td><td><b>ACTION</b></td><td style="text-align:right;" class="col-sm-2"><b>EXPECTED INVOICE</b></td><td class="col-sm-2" style="text-align:right;"><b>EXPECTED DISTRIBUTION</b></td><td><b>LINK TO INVOICE</b></td></tr></thead><tbody>';
+            //inlineQty += '<div><style>table#stockcount {font-size:12px; font-weight:bold; text-align:center; border-color: #24385b;} </style><table border="0" cellpadding="10" id="stockcount" cellspacing="0" class="table table-responsive table-striped"><thead style="color: white;background-color: #607799;"><tr><td style="text-align:left;"><b>ID</b></td><td style="text-align:left;" class="col-sm-3"><b>CUSTOMER NAME</b></td><td><b>ACTION</b></td><td style="text-align:right;" class="col-sm-2"><b>EXPECTED INVOICE</b></td><td class="col-sm-2" style="text-align:right;"><b>EXPECTED DISTRIBUTION</b></td><td><b>LINK TO INVOICE</b></td></tr></thead><tbody>';
 
+         
+            inlineQty = '<br></br><style>table#stockcount {font-size: 14px;text-align: center;border: none;}.dataTables_wrapper {font-size: 14px;}table#stockcount th{text-align: center;} .bolded{font-weight: bold;}</style>';
+            inlineQty += '<table id="stockcount" class="table table-responsive table-striped customer tablesorter" style="width: 100%;">';
+            inlineQty += '<thead style="color: white;background-color: #607799;">';
+            inlineQty += '<tr class="text-center">';
+            inlineQty += '</tr>';
+            inlineQty += '</thead>';
+
+            inlineQty += '<tbody id="stock_result" class="stock_result"></tbody>';
+
+            inlineQty += '</table>';
+            
             // var searchedSummary = search.load({ id: 'customrecord_job', type: 'customsearch_job_invoicing_summary' });
             //var searchedSummary = search.load({ id: 'customrecord_job', type: 'customsearch_job_inv_review_exp_amt' });
 
