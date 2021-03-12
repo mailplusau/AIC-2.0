@@ -158,7 +158,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                     id: job_id,
                 });
 
-                // job_record.getFieldValue('custrecord_job_date_invoiced') != getDate()
+                // job_record.getValue('custrecord_job_date_invoiced') != getDate()
                 if (isNullorEmpty(job_record.getValue({ fieldId: 'custrecord_job_date_invoiced' })) && isNullorEmpty(job_record.getValue({ fieldId: 'custrecord_job_invoice' }))) {
 
                     log.debug({
@@ -168,10 +168,10 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
                     if (from_invoice == 'Yes') {
 
-                        var jobGroupStatus = job_record.getFieldValue({ fieldId: 'custrecord_job_group_status' });
-                        var jobInvoiceable = job_record.getFieldValue({ fieldId: 'custrecord_job_invoiceable' });
-                        var jobCat = job_record.getFieldValue({ fieldId: 'custrecord_job_service_category' });
-                        var packageStatus = job_record.getFieldValue({ fieldId: 'custrecord_package_status' });
+                        var jobGroupStatus = job_record.getValue({ fieldId: 'custrecord_job_group_status' });
+                        var jobInvoiceable = job_record.getValue({ fieldId: 'custrecord_job_invoiceable' });
+                        var jobCat = job_record.getValue({ fieldId: 'custrecord_job_service_category' });
+                        var packageStatus = job_record.getValue({ fieldId: 'custrecord_package_status' });
 
                         if (isNullorEmpty(jobInvoiceable)) {
                             if (!isNullorEmpty(packageStatus)) {

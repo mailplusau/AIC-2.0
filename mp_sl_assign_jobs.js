@@ -25,7 +25,7 @@
      function onRequest(context) {  
          
         var form = ui.createForm({
-            title: ''
+            title: 'test'
         });
 
 

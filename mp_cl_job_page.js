@@ -189,7 +189,11 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
 
                     // alert(jobGroup);
                     // if (searchUsed == 1) {
-                    var searchedJobsExtras = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_jobs');
+                    var searchedJobsExtras = search.load({
+                        id: 'customsearch_job_invoicing_jobs',
+                        type: 'customrecord_job'
+                    });
+
                     // } else {
                     // 	var searchedJobsExtras = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_jobs_inc');
                     // }
@@ -200,7 +204,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
                     if (packageID == 'null' || isNullorEmpty(packageID) || discount_period == 3) {
                         filPo.push(['custrecord_job_service', search.Operator.IS, service]);
                         filPo.push(['custrecord_job_service_price', search.Operator.IS, price]);
-                        if (nlapiGetFieldValue('category') == 'Services' && currRec.getValue({ fieldId: 'incoming_status'}) != 3) {
+                        if (currRec.getValue({ fieldId: 'category' }) == 'Services' && currRec.getValue({ fieldId: 'incoming_status'}) != 3) {
                             filPo.push(['custrecord_job_group_status', search.Operator.IS, currRec.getValue({ fieldId: 'group_status'})]);
                         }
                     }

@@ -935,9 +935,10 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                 zee_text = ctx.getParameter({ name: 'custscript_zee_text' });
                 from_invoice = ctx.getParameter({ name: 'custscript_from_invoice' });
 
-                nlapiLogExecution('AUDIT', 'Inside Else to Update jobs');
-                nlapiLogExecution('AUDIT', 'Customer', ctx.getParameter({ name: 'custscript_customer_id' }));
-                nlapiLogExecution('AUDIT', 'Invoice', ctx.getParameter({ name: 'custscript_invoiceid' }));
+                
+                log.audit({ title: 'Inside Else to Update jobs' });
+                log.audit({ title: 'Customer', details: ctx.getParameter({ name: 'custscript_customer_id' }) });
+                log.audit({ title: 'Invoice', details: ctx.getParameter({ name: 'custscript_invoiceid' }) });
 
                 var result = updateJobs(ctx.getParameter({ name: 'custscript_customer_id' }), ctx.getParameter({ name: 'custscript_invoiceid' }), service_start_date, service_end_date, franchisee, from_invoice, ctx.getParameter({ name: 'custscript_special_customer_id' }), zee_text);
                 log.audit({

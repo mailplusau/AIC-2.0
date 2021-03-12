@@ -16,7 +16,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
     }
     var role = runtime.getCurrentUser().role;
     var ctx = runtime.getCurrentScript();
-    var currRec = currentRecord.get();
+    
 
     var service;
     var price;
@@ -28,6 +28,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
      * On page initialisation
      */
     function pageInit() {
+        var currRec = currentRecord.get();
         service = currRec.getValue({
             fieldId: 'service'
         })
@@ -43,7 +44,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
     }
 
     function saveRecord(context) {
-        
+        var currRec = currentRecord.get();
         var old_job_group = "";
         var fil = [];  
         fil.push(['custrecord_job_service', search.Operator.IS, service]);
@@ -57,9 +58,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
             fil.push(['custrecord_job_date_scheduled', search.Operator.ONORBEFORE, (currRec.getValue({ fieldId: 'end_date'}))]);
         }
 
-        var col = [];
-        // col[col.length] = new nlobjSearchColumn('internalid');
-        // col[col.length] = new nlobjSearchColumn('custrecord_job_group');
+        
 
         var poSearch = search.create({
             type: 'customrecord_job',
@@ -79,7 +78,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
             fil_po.push(['custrecord_job_service', search.Operator.IS, service]);
             fil_po.push(['custrecord_job_service_price', search.Operator.IS, price]);
             fil_po.push(['custrecord_job_customer', search.Operator.IS, customer]);
-            if (!isNullorEmpty(nlapiGetFieldValue('group_status'))) {
+            if (!isNullorEmpty(currRec.getValue({ fieldId: 'group_status' }))) {
                 fil_po.push(['custrecord_job_group_status', search.Operator.IS, currRec.getValue({ fieldId: 'group_status'})]);
             }
             if (!isNullorEmpty(job_group)) {
@@ -165,12 +164,10 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
 
     function onclick_Back() {
 
-        var upload_url = baseURL + nlapiResolveURL('SUITELET', 'customscript_sl_services_main_page', 'customdeploy_sl_services_main_page') + '&customer_id=' + nlapiGetFieldValue('customer') + '&start_date=' + nlapiGetFieldValue('start_date') + '&end_date=' + nlapiGetFieldValue('end_date');
-        window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
         
         var upload_url = baseURL + url.resolveScript({
             deploymentId: 'customdeploy_sl_services_main_page',
-            scriptId: 'customscript_sl_services_main_page' }) + '&customer_id=' + currRec.getValue({ fieldId: 'customer' }) + '&start_date=' + ncurrRec.getValue({ fieldId: 'start_date'}) + '&end_date=' + currRec.getValue({ fieldId: 'end_date'});
+            scriptId: 'customscript_sl_services_main_page' }) + '&customer_id=' + currRec.getValue({ fieldId: 'customer' }) + '&start_date=' + currRec.getValue({ fieldId: 'start_date'}) + '&end_date=' + currRec.getValue({ fieldId: 'end_date'});
         window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
         
         // window.opener.submit_package();

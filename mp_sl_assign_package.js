@@ -58,7 +58,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
         return className;
     }
 
-    function job_page(request, response) {  
+    function onRequest() {  
     
         var baseURL = 'https://1048144.app.netsuite.com';
         if (runtime.EnvType == "SANDBOX") {
@@ -71,7 +71,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
         var currRec = currentRecord.get();
 
         var status = null;
-        toString();
 
         if (context.request.method === 'GET') {
             var params = context.request.parameters;
@@ -164,16 +163,16 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
             } else {
                 filPo.push(['custrecord_job_service_package',search.Operator.ANYOF, packageID]);
             }
-            if (!isNullorEmpty(request.getParameter('start_date')) && !isNullorEmpty(request.getParameter('end_date'))) {
+            if (!isNullorEmpty(context.request.parameters.start_date) && !isNullorEmpty(context.request.parameters.end_date)) {
                 filPo.push(['custrecord_job_date_scheduled',search.Operator.ONORAFTER, 
                     format.parse({
-                        value: params.start_date,
+                        value: context.request.parameters.start_date,
                         type: format.Type.DATE
                     })
                 ]);
                 filPo.push(['custrecord_job_date_scheduled',search.Operator.ONORBEFORE,
                     format.parse({
-                        value: params.end_date,
+                        value: context.request.parameters.end_date,
                         type: format.Type.DATE
                     })
                 ]);
@@ -349,7 +348,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
             form.addField({
                 id: 'preview_table',
                 label: 'inlinehtml',
-                type: 'inlinehtml'
+                type: ui.FieldType.INLINEHTML
             }).updateLayoutType({
                 layoutType: ui.FieldLayoutType.STARTROW
             }).updateLayoutType({

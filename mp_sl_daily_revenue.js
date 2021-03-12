@@ -90,7 +90,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 name: 'custrecord_operator_franchisee',
                 operator: search.Operator.ANYOF,
                 values: zee,
-            }))
+            }));
             
             
             var operatorSet = operatorSearch.run();

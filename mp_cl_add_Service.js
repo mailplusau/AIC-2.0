@@ -100,7 +100,15 @@
 
             
             for (y = 1; y <= currentScript.getLineCount({ sublistId: 'services' }); y++) {
-                nlapiSetLineItemDisabled('services', 'itemprice', true, y);
+                
+                var lineItem = currentScript.getSublistField({
+                    sublistId: 'services',
+                    fieldId: 'itemprice',
+                    line: y
+                });
+
+                lineItem.isDisabled = true;
+                //nlapiSetLineItemDisabled('services', 'itemprice', true, y);
             }
         }
 

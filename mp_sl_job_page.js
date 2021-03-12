@@ -57,7 +57,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
         return className;
     }
 
-    function job_page(request, response) { 
+    function onRequest(context) { 
         
         if (context.request.method === 'GET') {
 

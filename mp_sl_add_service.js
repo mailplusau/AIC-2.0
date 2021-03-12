@@ -404,7 +404,7 @@
                     id: zee,
                 });
 
-                var zee_text = zee_record.getFieldValue('entitytitle');
+                var zee_text = zee_record.getValue({ fieldId: 'entitytitle' });
 
                 var strFormula = "COALESCE({custrecord_job_service.custrecord_service_franchisee},{custrecord_job_group.custrecord_jobgroup_franchisee},{custrecord_job_franchisee},'')";
 
@@ -468,7 +468,7 @@
 
                     var service_qty = (searchResult_2.getValue({ name: 'formulacurrency', join: null, summary: search.Summary.count }));
 
-                    var service_status = searchResult_2.getValue({ name: 'custrecord_jobgroup_status', join: 'CUSTRECORD_JOB_GROUP', summary: search.Summary.GROUP);
+                    var service_status = searchResult_2.getValue({ name: 'custrecord_jobgroup_status', join: 'CUSTRECORD_JOB_GROUP', summary: search.Summary.GROUP });
                     var extra_service_qty = (searchResult_2.getValue({ name: 'custrecord_job_extras_qty', join: null, summary: search.Summary.SUM }));
                     var job_source = searchResult_2.getValue({ name: 'custrecord_job_source', join: null, summary: search.Summary.GROUP });
 
@@ -709,7 +709,7 @@
                                 isDynamic: true,
                             });
                             
-                            // var franchisee = recCustomer.getFieldValue('partner');
+                            // var franchisee = recCustomer.getValue({ fieldId: 'partner' });
 
                             job_new_record.setValue({ fieldId: 'custrecord_job_customer', value: internal_id });
                             job_new_record.setValue({ fieldId: 'custrecord_job_franchisee', value: zee });

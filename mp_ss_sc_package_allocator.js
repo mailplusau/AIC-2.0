@@ -1067,7 +1067,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                                                     job_record.setValue({ fieldId: 'custrecord_job_service_package', value: package_id });
                                                                     job_record.setValue({ fieldId: 'custrecord_job_invoice_single_line_item', value: invoice_single_item });
                                                                     job_record.setValue({ fieldId: 'custrecord_job_discount_type', value: discount_type });
-                                                                    job_record.setValue({ fieldId: 'custrecord_package_job_groups value:', job_groups_list });
+                                                                    job_record.setValue({ fieldId: 'custrecord_package_job_groups value:', value: job_groups_list });
                                                                     job_record.setValue({ fieldId: 'custrecord_package_status', value: final_package_status });
                                                                     job_record.setValue({ fieldId: 'custrecord_job_invoiceable', value: final_invoiceable });
                                                                     job_record.setValue({ fieldId: 'custrecord_job_date_allocated', value: getDate() });

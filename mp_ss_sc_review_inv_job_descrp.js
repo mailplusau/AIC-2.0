@@ -106,8 +106,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                 }
 
                 log.audit({
-                    title: 'Loop# ' + count_group + ' | Job Group: ' + job_group_id + ' - ' + job_group_status, 'All: ' + all + ' Y: ' + yes + ' N: ' + no + ' null: ' + nullx + ' | Inv: ' + invoiceable,
-                    details: 'Loop# ' + count_group + ' | Job Group: ' + job_group_id + ' - ' + job_group_status, 'All: ' + all + ' Y: ' + yes + ' N: ' + no + ' null: ' + nullx + ' | Inv: ' + invoiceable
+                    title: 'Loop# ' + count_group + ' | Job Group: ' + job_group_id + ' - ' + job_group_status,
+                    details: 'All: ' + all + ' Y: ' + yes + ' N: ' + no + ' null: ' + nullx + ' | Inv: ' + invoiceable
                 });
 
                 if (!isNullorEmpty(job_group_id)) {
