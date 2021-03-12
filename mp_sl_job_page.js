@@ -80,8 +80,8 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
             var discount_period = null;
             if (!isNullorEmpty(packageID) && packageID != 'null') {
                 var package_record = record.load({ type:'customrecord_service_package', id: packageID});
-                var package_name = package_record.getValue({ name: 'name'});
-                discount_period = package_record.getValue({ name: 'custrecord_service_package_disc_period'});
+                var package_name = package_record.getValue({ fieldId: 'name'});
+                discount_period = package_record.getValue({ fieldId: 'custrecord_service_package_disc_period'});
                 if (discount_period == 3) {
                     locked = 'yes';
                 }
@@ -89,9 +89,17 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
 
             // var franchisee = 
 
-            var customerName = nlapiLookupField('customer', customer, 'companyname');
-            var customerID = nlapiLookupField('customer', customer, 'entityid');
-
+            var customerName = search.lookupFields({
+                type: 'customer',
+                id: customer,
+                columns: 'companyname'
+            });
+            var customerID = search.lookupFields({
+                type: 'customer', 
+                id: customer,
+                columns: 'entityid'
+            });
+            
             var statusText = '';
 
             if (staus == '1') {
@@ -106,20 +114,40 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
 
             // nlapiLogExecution('DEBUG', 'assignPackage', assignPackage)
             if (!isNullorEmpty(assignPackage) && assignPackage != 'undefined') {
-                var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
+                var form = ui.createForm({
+                    title: 'Activity Page: ' + customerID + ' ' + customerName
+                });
                 var filPoPackage = [];
-                filPoPackage[filPoPackage.length] = new nlobjSearchFilter('internalid', null, 'is', service);
+                filPoPackage.push(['internalid', search.Operator.IS, service]);
 
-                var colPoPackage = [];
-                colPoPackage[colPoPackage.length] = new nlobjSearchColumn('internalid');
-                colPoPackage[colPoPackage.length] = new nlobjSearchColumn('name');
-                colPoPackage[colPoPackage.length] = new nlobjSearchColumn('custrecord_service_package');
+                // var colPoPackage = [];
+                // colPoPackage[colPoPackage.length] = new nlobjSearchColumn('internalid');
+                // colPoPackage[colPoPackage.length] = new nlobjSearchColumn('name');
+                // colPoPackage[colPoPackage.length] = new nlobjSearchColumn('custrecord_service_package');
 
                 var poSearchPackage = nlapiSearchRecord('customrecord_service', null, filPoPackage, colPoPackage);
+
+                var poSearchPackage = search.create({
+                    type: 'customrecord_service',
+                    columns: [{
+                        name: 'internalid'
+                    }, {
+                        name: 'custrecord_service_package'
+                    }, {
+                        name: 'name'
+                    }]
+                });
+
             } else if (!isNullorEmpty(staus)) {
-                var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
+                // var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
+                var form = ui.createForm({
+                    title: 'Activity Page: ' + customerID + ' ' + customerName
+                });
             } else {
-                var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
+                // var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
+                var form = ui.createForm({
+                    title: 'Activity Page: ' + customerID + ' ' + customerName
+                });
             }
 
             form.addField({
@@ -201,7 +229,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                     filPo.push(['custrecord_package_status',search.Operator.is, staus]);
                 }
             }
-            if (!isNullorEmpty(request.getParameter('start_date')) && !isNullorEmpty(request.getParameter('end_date'))) {
+            if (!isNullorEmpty(ctx.getParameter('start_date')) && !isNullorEmpty(ctx.getParameter('end_date'))) {
                 filPo.push(['custrecord_job_date_scheduled', search.Operator.onorafter, format.parse({
                     value: currRec.getValue({ fieldId: 'start_date'}),
                     type: format.Type.DATE
@@ -336,13 +364,21 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
 
             if (packageID == 'null' || (!isNullorEmpty(discount_period) && discount_period == 3)) {
                 var serviceRecord = record.load({ type: 'customrecord_service', id: service});
-                var service_zee = serviceRecord.getText({ type: 'custrecord_service_franchisee' });
+                var service_zee = serviceRecord.getText({ fieldId: 'custrecord_service_franchisee' });
                 if (isNullorEmpty(service_zee)) {
                     service_zee = 'All';
                 }
-                inlineQty += '<div class="row"><div class="col-xs-3"><label class="control-label">Service</label><input type="text" readonly class="form-control" value="' + nlapiLookupField('customrecord_service', service, 'name') + '" style="font-weight: bold;" /></div><div class="col-xs-3"><label class="control-label">Service Price</label><input type="text" readonly class="form-control" value="' + price + '" style="font-weight: bold;"/></div><div class="col-xs-3"><label class="control-label">Franchisee</label><input type="text" readonly class="form-control" value="' + service_zee + '" style="font-weight: bold;" /></div></div><br><br>';
+                inlineQty += '<div class="row"><div class="col-xs-3"><label class="control-label">Service</label><input type="text" readonly class="form-control" value="' + search.lookupFields({
+                    type: 'customrecord_service',
+                    id: service,
+                    columns: 'name'
+                }) + '" style="font-weight: bold;" /></div><div class="col-xs-3"><label class="control-label">Service Price</label><input type="text" readonly class="form-control" value="' + price + '" style="font-weight: bold;"/></div><div class="col-xs-3"><label class="control-label">Franchisee</label><input type="text" readonly class="form-control" value="' + service_zee + '" style="font-weight: bold;" /></div></div><br><br>';
             } else {
-                inlineQty += '<div class="row"><div class="col-xs-3"><label class="control-label">Package Name</label><input type="text" readonly class="form-control" value="' + nlapiLookupField('customrecord_service_package', packageID, 'name') + '" style="font-weight: bold;" /></div></div><br><br>'
+                inlineQty += '<div class="row"><div class="col-xs-3"><label class="control-label">Package Name</label><input type="text" readonly class="form-control" value="' + search.lookupFields({
+                    type: 'customrecord_service_package',
+                    id: packageID,
+                    columns: 'name'
+                }) + '" style="font-weight: bold;" /></div></div><br><br>'
             }
 
             inlineQty += '<table border="0" cellpadding="10" id="stockcount" cellspacing="0" class="table"><thead style="color: white;background-color: #607799;"><tr>';
@@ -494,7 +530,10 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 } else {
                     // nlapiLogExecution('DEBUG', 'inside');
                     if (old_package_job_groups !== package_job_groups) {
-                        nlapiLogExecution('DEBUG', 'new group', package_job_groups);
+                        log.debug({
+                            title: 'new group',
+                            details: package_job_groups
+                        });
                         className = rowColor(className);
                         if (!isNullorEmpty(assignPackage) && assignPackage != 'undefined') {
                             inlineQty += '<tr class="' + className + '" style="border-top-style: solid; border-top-width: 2px; border-top-color: grey;"><td><select class="form-control" id="package_assigned[' + i + ']" data-jobid="' + jobID + '" data-jobgroup="' + jobGroup + '" class="package_assigned"><option value="0">No Package</option>';
@@ -544,7 +583,10 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                         inlineQty += '<td>' + jobInvoiceableText + '</td>';
                         inlineQty += '</tr>';
                     } else {
-                        nlapiLogExecution('DEBUG', 'same group', old_package_job_groups);
+                        log.debug({
+                            title: 'same group',
+                            details: old_package_job_groups
+                        });
                         inlineQty += '<tr class="' + className + '"><td></td>';
                         inlineQty += '<td>' + serviceID + '</td>'
                         inlineQty += '<td>' + servicePrice + '</td>'
@@ -553,10 +595,8 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                         inlineQty += '<td>' + package_job_groups + '</td>';
                         inlineQty += '<td>' + jobInvoiceableText + '</td>';
                         inlineQty += '</tr>';
-
                     }
                 }
-
 
                 oldJobGroup = jobGroup;
                 old_package_job_groups = package_job_groups;
@@ -565,12 +605,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
 
                 return true;
             });
-
-            // form.addField('preview_table', 'inlinehtml', '').setLayoutType('outsidebelow', 'startrow').setDefaultValue(inlineQty);
-            // form.addSubmitButton('Save');
-            // form.addButton('cust_back', 'Back', 'onclick_Back()');
-            // form.addButton('cust_back', 'Reset', 'onclick_reset()');
-            // form.setScript('customscript_cl_job_page');
 
             form.addField({
                 id: 'preview_table',
@@ -601,7 +635,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
             form.clientScriptFileId = //; // GET THE CLIENT ID
 
             context.response.writePage(form);
-
 
         } else {
             var internalID = params.customer;

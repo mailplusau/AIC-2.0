@@ -195,7 +195,7 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
                     });
 
                     // } else {
-                    // 	var searchedJobsExtras = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_jobs_inc');
+                    var searchedJobsExtras = search.load({ type: 'customrecord_job', id: 'customsearch_job_invoicing_jobs_inc'});
                     // }
 
                     var filPo = [];
@@ -250,15 +250,15 @@ function(error, runtime, search, url, record, format, email, currentRecord) {
     
                                     if (assignPackage == 'true') {
                                         package_array[i][pack_len] = value
-                                        // jobRecord.setFieldValue('custrecord_job_service_package', value);
+                                        // jobRecord.setValue({ fieldId: 'custrecord_job_service_package', value: value);
                                     } else {
                                         invoiceable_array[i][inv_len] = value;
-                                        // jobRecord.setFieldValue('custrecord_job_invoiceable', value);
+                                        // jobRecord.setValue({ fieldId: 'custrecord_job_invoiceable', value: value);
                                     }
     
-                                    // jobRecord.setFieldValue('custrecord_job_date_reviewed', getDate());
+                                    // jobRecord.setValue({ fieldId: 'custrecord_job_date_reviewed', value: getDate());
     
-                                    // nlapiSubmitRecord(jobRecord);
+                                    // jobRecord.save();
                                     // count++;
                                     return true;
                                 });
