@@ -1,7 +1,7 @@
 /**
  * Module Description
  * @NApiVersion 2.x
- * @NScriptType MapReduceScript
+ * @NScriptType ScheduledScript
  * 
  * Author: Anesu Chakaingesu    
  *

@@ -49,7 +49,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                 log.emergency({ title: 'Received Parameters | ', details: 'End Date: ' + endDate });
                 prevInvDeploy = ctx.getParameter({ name: 'custscript_prev_deploy' });
             } else {
-                prevInvDeploy = ctx.getDeploymentId();
+                prevInvDeploy = ctx.getDeploymentId;
                 log.emergency({ title: 'Initial Parameters | ', details: 'Zee ID: ' + partner });
                 log.emergency({ title: 'Initial Parameters | ', details: 'Start Date: ' + startDate });
                 log.emergency({ title: 'Initial Parameters | ', details: 'End Date: ' + endDate });

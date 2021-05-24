@@ -37,7 +37,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
 	        resultSet_group.each(function(group) {
                 usageStart = ctx.getRemainingUsage();
-
+                
                 if (usageStart <= usageThreshold) {
         
                     log.debug({
@@ -69,8 +69,9 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                 var job_group_status = group.getValue({ name: "custrecord_job_group_status", join: null, summary: search.Summary.GROUP});
 
                 var cols = group.columns;
-                cols.each(function(col) {
-                    switch (col.getLabel()) {
+
+                cols.forEach(function(col) {
+                    switch (col["label"]) {
                         case 'All':
                             all = group.getValue(col);
                             break;
@@ -102,7 +103,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                         }
                     }
                 } else {
-                    invoceable = null;
+                    invoiceable = null;
                 }
 
                 log.audit({

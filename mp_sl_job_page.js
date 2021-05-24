@@ -17,7 +17,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
     }
     var role = runtime.getCurrentUser().role;
     var ctx = runtime.getCurrentScript();
-    var currRec = currentRecord.get();
+    //var currRec = currentRecord.get();
     var zee = runtime.getCurrentUser().id;
 
     var status = null;
@@ -61,16 +61,16 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
         
         if (context.request.method === 'GET') {
 
-            var customer = currRec.getValue({ fieldId: 'customer_id'});
-            var service = currRec.getValue({ fieldId: 'service_id'});
-            var price = currRec.getValue({ fieldId: 'rate'});
-            var category = currRec.getValue({ fieldId: 'category'});
-            var packageID = currRec.getValue({ fieldId: 'package'});
-            var assignPackage = currRec.getValue({ fieldId: 'assign_packge'});
-            staus = currRec.getValue({ fieldId: 'status'});
-            var locked = currRec.getValue({ fieldId: 'locked'});
-            var scID = currRec.getValue({ fieldId: 'sc'});
-            zee = currRec.getValue({ fieldId: 'zee'});
+            var customer = context.request.parameters.customer_id;
+            var service = context.request.parameters.service_id;
+            var price = context.request.parameters.rate;
+            var category = context.request.parameters.category;
+            var packageID = context.request.parameters.package;
+            var assignPackage = context.request.parameters.assign_packge;
+            staus = context.request.parameters.status;
+            var locked = context.request.parameters.locked;
+            var scID = context.request.parameters.sc;
+            zee = context.request.parameters.zee;
 
             log.debug({
                 title: 'price',
