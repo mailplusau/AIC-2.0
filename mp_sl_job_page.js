@@ -9,8 +9,8 @@
  */
 
 
-define(['N/ui/serverWidget', 'N/email', 'N/runtime', 'N/search', 'N/record', 'N/http', 'N/log', 'N/redirect', 'N/format'], 
-function(ui, email, runtime, search, record, http, log, redirect, format) {
+define(['N/ui/serverWidget', 'N/email', 'N/runtime', 'N/search', 'N/record', 'N/http', 'N/log', 'N/redirect', 'N/format', 'N/currentRecord'], 
+function(ui, email, runtime, search, record, http, log, redirect, format, currentRecord) {
     var baseURL = 'https://1048144.app.netsuite.com';
     if (runtime.EnvType == "SANDBOX") {
         baseURL = 'https://1048144-sb3.app.netsuite.com';
@@ -87,8 +87,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 }
             }
 
-            // var franchisee = 
-
             var customerName = search.lookupFields({
                 type: 'customer',
                 id: customer,
@@ -112,7 +110,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 statusText = 'Scheduled';
             }
 
-            // nlapiLogExecution('DEBUG', 'assignPackage', assignPackage)
             if (!isNullorEmpty(assignPackage) && assignPackage != 'undefined') {
                 var form = ui.createForm({
                     title: 'Activity Page: ' + customerID + ' ' + customerName
@@ -124,8 +121,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 // colPoPackage[colPoPackage.length] = new nlobjSearchColumn('internalid');
                 // colPoPackage[colPoPackage.length] = new nlobjSearchColumn('name');
                 // colPoPackage[colPoPackage.length] = new nlobjSearchColumn('custrecord_service_package');
-
-                var poSearchPackage = nlapiSearchRecord('customrecord_service', null, filPoPackage, colPoPackage);
 
                 var poSearchPackage = search.create({
                     type: 'customrecord_service',
@@ -139,12 +134,10 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 });
 
             } else if (!isNullorEmpty(staus)) {
-                // var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
                 var form = ui.createForm({
                     title: 'Activity Page: ' + customerID + ' ' + customerName
                 });
             } else {
-                // var form = nlapiCreateForm('Activity Page: ' + customerID + ' ' + customerName);
                 var form = ui.createForm({
                     title: 'Activity Page: ' + customerID + ' ' + customerName
                 });
@@ -205,45 +198,45 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
             // }
 
             var filPo = [];
-            filPo.push(['custrecord_job_customer',search.Operator.is, customer]);
-            filPo.push(['custrecord_job_source',search.Operator.anyof, [4, 5, 6]]);
+            filPo.push(['custrecord_job_customer',search.Operator.IS, customer]);
+            filPo.push(['custrecord_job_source',search.Operator.ANYOF, [4, 5, 6]]);
 
             if (packageID == 'null') {
-                filPo.push(['custrecord_job_service',search.Operator.is, service]);
-                filPo.push(['custrecord_job_service_price',search.Operator.equalto, parseFloat(price)]);
-                filPo.push(['custrecord_job_service_package',search.Operator.anyof, '@NONE@']);
+                filPo.push(['custrecord_job_service',search.Operator.IS, service]);
+                filPo.push(['custrecord_job_service_price',search.Operator.EQUALTO, parseFloat(price)]);
+                filPo.push(['custrecord_job_service_package',search.Operator.ANYOF, '@NONE@']);
                 if (category == 'Services') {
-                    filPo.push(['custrecord_job_group_status',search.Operator.is, statusText]);
+                    filPo.push(['custrecord_job_group_status',search.Operator.IS, statusText]);
                 }
             } else {
-                filPo.push(['custrecord_job_service_package',search.Operator.anyof, packageID]);
+                filPo.push(['custrecord_job_service_package',search.Operator.ANYOF, packageID]);
 
                 if (discount_period == 3) {
-                    filPo.push(['custrecord_job_service',search.Operator.is, service]);
-                    filPo.push(['custrecord_job_service_price',search.Operator.equalto, parseFloat(price)]);
+                    filPo.push(['custrecord_job_service',search.Operator.IS, service]);
+                    filPo.push(['custrecord_job_service_price',search.Operator.EQUALTO, parseFloat(price)]);
                     // filPo.push(['custrecord_job_service_package',search.Operator.anyof, '@NONE@']);
                     if (category == 'Services') {
-                        filPo.push(['custrecord_job_group_status',search.Operator.is, statusText]);
+                        filPo.push(['custrecord_job_group_status',search.Operator.IS, statusText]);
                     }
                 } else {
-                    filPo.push(['custrecord_package_status',search.Operator.is, staus]);
+                    filPo.push(['custrecord_package_status',search.Operator.IS, staus]);
                 }
             }
-            if (!isNullorEmpty(ctx.getParameter('start_date')) && !isNullorEmpty(ctx.getParameter('end_date'))) {
-                filPo.push(['custrecord_job_date_scheduled', search.Operator.onorafter, format.parse({
-                    value: currRec.getValue({ fieldId: 'start_date'}),
+            if (!isNullorEmpty(params.start_date) && !isNullorEmpty(params.end_date)) {
+                filPo.push(['custrecord_job_date_scheduled', search.Operator.ONORAFTER, format.parse({
+                    value: params.start_date,
                     type: format.Type.DATE
                 })]);
-                filPo.push(['custrecord_job_date_scheduled', search.Operator.onorbefore, format.parse({
-                    value: currRec.getValue({ fieldId: 'end_date'}),
+                filPo.push(['custrecord_job_date_scheduled', search.Operator.ONORBEFORE, format.parse({
+                    value: params.end_date,
                     type: format.Type.DATE
                 })]);
             }      
 
             if (!isNullorEmpty(scID)) {
-                filPo.push(['custrecord_job_special_customer', search.Operator.is, scID]);
+                filPo.push(['custrecord_job_special_customer', search.Operator.IS, scID]);
             } else {
-                filPo.push(['custrecord_job_special_customer', search.Operator.is, '@NONE@']);
+                filPo.push(['custrecord_job_special_customer', search.Operator.IS, '@NONE@']);
             }
 
             searchedJobsExtras.addFilters(filPo);
@@ -255,19 +248,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
             // } else {
             //     zee = '6'; //Test
             // }
-
-            // form.addField('service', 'text', 'Service').setDisplayType('hidden').setDefaultValue(service);
-            // form.addField('price', 'text', 'Service').setDisplayType('hidden').setDefaultValue(price);
-            // form.addField('customer', 'text', 'Service').setDisplayType('hidden').setDefaultValue(customer);
-            // form.addField('zee_id', 'text', 'Service').setDisplayType('hidden').setDefaultValue(zee);
-            // form.addField('group_status', 'text', 'Service').setDisplayType('hidden').setDefaultValue(statusText);
-            // form.addField('incoming_status', 'text', 'Service').setDisplayType('hidden').setDefaultValue(staus);
-            // form.addField('category', 'text', 'Service').setDisplayType('hidden').setDefaultValue(category);
-            // form.addField('package', 'text', 'Service').setDisplayType('hidden').setDefaultValue(assignPackage);
-            // form.addField('package_id', 'text', 'Service').setDisplayType('hidden').setDefaultValue(packageID);
-            // form.addField('job_array', 'text', 'Service').setDisplayType('hidden');
-            // form.addField('package_array', 'text', 'Service').setDisplayType('hidden');
-            // form.addField('invoiceable_array', 'text', 'Service').setDisplayType('hidden');
 
             form.addField({
                 id: 'service',
@@ -488,13 +468,13 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                                             inlineQty += '<option value="' + packageIds[x] + '" selected>' + search.lookupFields({
                                                 type: 'customrecord_service_package',
                                                 id: packageIds[x],
-                                                columns: 'name'
+                                                columns: ['name']
                                             }) + '</option>';
                                         } else {
                                             inlineQty += '<option value="' + packageIds[x] + '">' + search.lookupFields({
                                                 type: 'customrecord_service_package',
                                                 id: packageIds[x],
-                                                columns: 'name'
+                                                columns: ['name']
                                             }) + '</option>';
                                         }
                                     }
@@ -547,13 +527,13 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                                             inlineQty += '<option value="' + packageIds[x] + '" selected>' + search.lookupFields({
                                                 type: 'customrecord_service_package',
                                                 id: packageIds[x],
-                                                columns: 'name'
+                                                columns: ['name']
                                             }) + '</option>';
                                         } else {
                                             inlineQty += '<option value="' + packageIds[x] + '">' + search.lookupFields({
                                                 type: 'customrecord_service_package',
                                                 id: packageIds[x],
-                                                columns: 'name'
+                                                columns: ['name']
                                             }) + '</option>';
                                         }
                                     }
@@ -665,8 +645,6 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
 
 
             // nlapiSetRedirectURL('SUITELET', 'customscript_sl_services_main_page', 'customdeploy_sl_services_main_page', null, params);
-            // nlapiSetRedirectURL('SUITELET', 'customscript_sl_assign_jobs', 'customdeploy_sl_assign_jobs', null, params);
-
             redirect.toSuitelet({
                 scriptId: 'customscript_sl_assign_jobs',
                 deploymentId: 'customdeploy_sl_assign_jobs',
