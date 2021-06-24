@@ -11,12 +11,15 @@
 define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/email', 'N/currentRecord'],
     function(error, runtime, search, url, record, format, email, currentRecord) {
         var baseURL = 'https://1048144.app.netsuite.com';
-        if (runtime.EnvType == "SANDBOX") {
+        if (runtime.envType == "SANDBOX") {
             baseURL = 'https://1048144-sb3.app.netsuite.com';
         }
         var role = runtime.getCurrentUser().role;
-
+        var zee = 0;
         var ctx = runtime.getCurrentScript();
+        var deleted_service_ids = [];
+        var deleted_job_ids = [];
+
         if (role == 1000) {
             //Franchisee
             zee = ctx.getCurrentUser();
@@ -39,6 +42,10 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
                 // Animate loader off screen
                 $(".se-pre-con").fadeOut("slow");;
             });
+
+            $("#NS_MENU_ID0-item0").css("background-color", "#CFE0CE");
+            $("#NS_MENU_ID0-item0 a").css("background-color", "#CFE0CE");
+            $("#body").css("background-color", "#CFE0CE");
 
             $(document).ready(function() {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -109,12 +116,23 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
 
             var result = finalise_date(currentScript.getValue({ fieldId: 'start_date' }));
 
-            $(document).on('click', '.instruction_button', function(e) {
-
-                $('.table_start').css("padding-top", "300px");
-                $('.instruction_button').hide();
-            });
+            // $(document).on('click', '.instruction_button', function(e) {
+            //     console.log("abc");
+            //     $('.table_start').css("padding-top", "300px");
+            //     $('.instruction_button').hide();
+            // });
             
+
+            $('.collapse').on('shown.bs.collapse', function() {
+                $('.table_start').css("padding-top", "250px");
+            })
+            
+            $('.collapse').on('hide.bs.collapse', function() {
+                $('.table_start').css("padding-top", "0px");
+
+            })
+
+
             $('#exampleModal').on('show.bs.modal', function(event) {
                 var button = $(event).relatedTarget // Button that triggered the modal
                 var recipient = button.data('whatever') // Extract info from data-* attributes
@@ -636,10 +654,20 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             
             });
 
+            $('.add_services').click(function() {
+                console.log("clicked services btn");
+                var serv_param = $(this).attr("fnparam");
+                
+                addService(serv_param);
+
+            });
+
+            
             /**
              * [description] - To show the Invoice Preview modal
              */
             $(document).on('click', '.preview_row', function(event) {
+                console.log("prev clicked");
                 var currentScript = currentRecord.get();
 
                 var discount_type_elem = document.getElementsByClassName("discount_type");
@@ -946,18 +974,12 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
                     type: 'customrecord_job'
                 });
 
-                searchedJobsExtras.filters.push(search.createFilter({ name: 'custrecord_operator_franchisee',
-                    operator: search.Operator.ANYOF,
-                    values: zee,
-                }));
-
-
+                
                 searchedJobsExtras.filters.push(search.createFilter({ name: 'custrecord_job_date_inv_finalised', operator: search.Operator.ISEMPTY }));
                 if (!isNullorEmpty(currentScript.getValue({ fieldId: 'start_date' })) && !isNullorEmpty(currentScript.getValue({ fieldId: 'end_date' }))) {
                     searchedJobsExtras.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: currentScript.getValue({ fieldId: 'start_date' }) }));
                     searchedJobsExtras.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: currentScript.getValue({ fieldId: 'end_date' }) }));
                 }
-
 
                 var resultSetExtras = searchedJobsExtras.run();
 
@@ -1143,10 +1165,10 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
 
             var currentScript = currentRecord.get();
             if (status == null) {
-                var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page', deploymentId: 'customdeploy_job_page' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&assign_packge=' + assign_packge + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
+                var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page_2', deploymentId: 'customdeploy_job_page_2' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&assign_packge=' + assign_packge + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
                 window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
             } else {
-                var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page', deploymentId: 'customdeploy_job_page' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&assign_packge=' + assign_packge + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
+                var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page_2', deploymentId: 'customdeploy_job_page_2' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&assign_packge=' + assign_packge + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
                 window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
             }
         }
@@ -1156,7 +1178,7 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             var currentScript = currentRecord.get();
             //setReviewDate(internal_id);
 
-            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page', deploymentId: 'customdeploy_job_page' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
+            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page_2', deploymentId: 'customdeploy_job_page_2' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
             window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
         }
 
@@ -1165,15 +1187,19 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             var currentScript = currentRecord.get();
             // setReviewDate(internal_id);
 
-            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page', deploymentId: 'customdeploy_job_page' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
+            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_job_page_2', deploymentId: 'customdeploy_job_page_2' }) + '&customer_id=' + internal_id + '&rate=' + service_rate + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
             window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
         }
 
         //ON CLICK OF THE BACK TO SUMMARY BUTTON
         function onclick_summaryPage() {
             var currentScript = currentRecord.get();
-            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_summary_page', deploymentId: 'customdeploy_summary_page' }) + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
+            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_summary_page_2', deploymentId: 'customdeploy_summary_page_2' }) + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
             window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
+        }
+
+        function onclick_reset() {
+            window.location.href = window.location.href;
         }
 
         //ON CLICK OF ADD SERVICES BUTTON
@@ -1181,7 +1207,7 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
             var currentScript = currentRecord.get();
             //setReviewDate(currentScript.getValue({ fieldId: 'customer_id')) };
 
-            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_add_service', deploymentId: 'customdeploy_sl_add_service' }) + '&custid=' + currentScript.getValue({ fieldId: 'customer_id' }) + '&unlayered=T&service_cat=' + service_cat + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
+            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_add_service_2', deploymentId: 'customdeploy_sl_add_service_2' }) + '&custid=' + currentScript.getValue({ fieldId: 'customer_id' }) + '&unlayered=T&service_cat=' + service_cat + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' }) + '&locked=' + global_locked + '&sc=' + currentScript.getValue({ fieldId: 'scid' }) + '&zee=' + currentScript.getValue({ fieldId: 'zee_id' });
             window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
         }
 
@@ -1227,14 +1253,14 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
 
         function onclick_AssignPackage(internal_id, service_rate, service_id, job_group, status, category, package_id) {
             var currentScript = currentRecord.get();
-            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_assign_package', deploymentId: 'customdeploy_sl_assign_package' }) + '&customer_id=' + internal_id + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&rate=' + service_rate + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' });
+            var upload_url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_assign_package_2', deploymentId: 'customdeploy_sl_assign_package_2' }) + '&customer_id=' + internal_id + '&service_id=' + service_id + '&job_group=' + job_group + '&status=' + status + '&rate=' + service_rate + '&category=' + category + '&package=' + package_id + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' });
             window.open(upload_url, "_self", "height=750,width=650,modal=yes,alwaysRaised=yes");
 
         }
 
         function submit_package() {
             var currentScript = currentRecord.get();
-            var url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_services_main_page', deploymentId: 'customdeploy_sl_services_main_page' }) + '&customer_id=' + currentScript.getValue({ fieldId: 'customer_id' }) + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' });
+            var url = baseURL + url.resolveScript({ scriptId: 'customscript_sl_services_main_page_2', deploymentId: 'customdeploy_sl_services_main_page_2' }) + '&customer_id=' + currentScript.getValue({ fieldId: 'customer_id' }) + '&start_date=' + currentScript.getValue({ fieldId: 'start_date' }) + '&end_date=' + currentScript.getValue({ fieldId: 'end_date' });
             window.open(url, "_self", "height=680,width=640,modal=yes,alwaysRaised=yes");
 
         }
@@ -1900,12 +1926,6 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
         function adminFeesServiceCheck(customer_id, service_id, deleted_job_ids) {
 
             var searched_jobs = search.load({ id: 'customrecord_job', type: 'customsearch_job_inv_review_all' });
-        
-
-            searched_jobs.filters.push(search.createFilter({ name: 'custrecord_operator_franchisee',
-                operator: search.Operator.ANYOF,
-                values: zee,
-            }));
 
             searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_customer', operator: search.Operator.IS, values: customer_id }));
             searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_service', operator: search.Operator.IS, values: service_id }));
@@ -2186,6 +2206,9 @@ define(['N/error', 'N/runtime', 'N/search', 'N/url', 'N/record', 'N/format', 'N/
         return {
             pageInit: pageInit,
             saveRecord: saveRecord,
+            onclick_review: onclick_review,
+            onclick_summaryPage: onclick_summaryPage,
+            onclick_reset: onclick_reset
             
         };  
     }

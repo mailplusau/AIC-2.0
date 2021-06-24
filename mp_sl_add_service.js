@@ -75,7 +75,7 @@
                 });
             }
 
-            var pricing_subTab = form.addFieldGroup('custom_pricing', 'Service Pricing');
+            var pricing_subTab = form.addFieldGroup({ id: 'custom_pricing', label: 'Service Pricing' });
             form.addField({ 
                 id: 'start_date', 
                 type: ui.FieldType.TEXT, 
@@ -285,13 +285,13 @@
             if (context.request.parameters.service_cat == '3') {
                 form.addTab({ id: 'custom_pricing', label: 'Standard / Used Extras' });
                 form.addTab({ id: 'custom_new_pricing', label: 'Custom Extras'});
-                form.addSubTab({ id: 'custpage_pricing', label: 'Standard / Extras', tab: 'custom_pricing' });
-                form.addSubTab({ id: 'custpage_new_pricing', label: 'Custom Extras', tab:'custom_new_pricing'});
+                form.addSubtab({ id: 'custpage_pricing', label: 'Standard / Extras', tab: 'custom_pricing' });
+                form.addSubtab({ id: 'custpage_new_pricing', label: 'Custom Extras', tab:'custom_new_pricing'});
             } else {
                 form.addTab({ id: 'custom_pricing', label: 'Existing / Used Services' });
                 form.addTab({ id: 'custom_new_pricing', label: 'New Services' });
-                form.addSubTab({ id: 'custpage_pricing', label: 'Existing / Used  Services', tab:'custom_pricing'});
-                form.addSubTab({ id: 'custpage_new_pricing', label: 'New Services', tab:'custom_new_pricing'});
+                form.addSubtab({ id: 'custpage_pricing', label: 'Existing / Used  Services', tab:'custom_pricing'});
+                form.addSubtab({ id: 'custpage_new_pricing', label: 'New Services', tab:'custom_new_pricing'});
             }
 
             form.addField({ 
@@ -313,14 +313,16 @@
             }).defaultValue = context.request.parameters.service_cat;
 
             
-            var sublistPricing = form.addSubList({ 
-                id: 'services', type:'editor', 
+            var sublistPricing = form.addSublist({ 
+                id: 'services',
                 label: 'Services / Extras', 
-                tab: 'custpage_pricing' 
+                tab: 'custpage_pricing',
+                type: 'editor'
             });
+
             sublistPricing.addField({ 
                 id: 'service_record_internalid', 
-                type: ui.FieldType.integer, 
+                type: ui.FieldType.INTEGER, 
                 label: 'InternalID' 
             }).updateDisplayType({
                 displayType: ui.FieldDisplayType.HIDDEN
@@ -335,11 +337,15 @@
             });
             var service_type = sublistPricing.addField({ 
                 id: 'item', 
-                type: ui.FieldType.select, 
+                type: ui.FieldType.SELECT, 
                 label: 'Item' 
             }).updateDisplayType({
                 displayType: ui.FieldDisplayType.DISABLED
-            }).setMandatory(true);
+            });
+
+           
+            service_type.isMandatory = true;
+
 
             
             service_type.addSelectOption({ value: '', text: '' });
@@ -358,27 +364,38 @@
             }).updateDisplayType({
                 displayType: ui.FieldDisplayType.DISABLED
             })
-            sublistPricing.addField({ 
+            var itemprice_field = sublistPricing.addField({ 
                 id: 'itemprice', 
                 type: ui.FieldType.CURRENCY, 
                 label: 'Price (ex GST)'
             }).updateDisplayType({
                 displayType: ui.FieldDisplayType.DISABLED
-            }).setMandatory(true);
+            });
             
-            sublistPricing.addField({ 
+           
+        
+            itemprice_field.isMandatory = true;
+                        
+            var itemqty_field = sublistPricing.addField({ 
                 id: 'itemqty', 
                 type: ui.FieldType.TEXT, 
                 label: 'App Quantity'
             }).updateDisplayType({
                 displayType: ui.FieldDisplayType.DISABLED
-            }).setMandatory(true).defaultValue = '0';
+            }).defaultValue = '0';
 
-            sublistPricing.addField({ 
+            
+            itemqty_field.isMandatory = true;
+
+            var itemaddqty_field = sublistPricing.addField({ 
                 id: 'itemaddqty', 
                 type: ui.FieldType.INTEGER, 
                 label: 'Additional Quantity'
-            }).setMandatory(true);
+            });
+
+            
+        
+            itemaddqty_field.isMandatory = true;
 
             sublistPricing.addField({ 
                 id: 'old_itemaddqty', 
@@ -425,13 +442,13 @@
                     searched_jobs_2.filters.push(search.createFilter({
                         name: 'custrecord_job_date_scheduled',
                         operator: search.Operator.ONORAFTER,
-                        values: format.parse({ value: context.request.parameters.start_date, type: format.Type.DATE })
+                        values: format.format({ value: context.request.parameters.start_date, type: format.Type.DATE })
                     }));
 
                     searched_jobs_2.filters.push(search.createFilter({
                         name: 'custrecord_job_date_scheduled',
                         operator: search.Operator.ONORBEFORE,
-                        values: format.parse({ value: context.request.parameters.end_date, type: format.Type.DATE })
+                        values: format.format({ value: context.request.parameters.end_date, type: format.Type.DATE })
                     }));
                     
                 }
@@ -507,16 +524,28 @@
                 });
 
 
+                log.debug({
+                    title: 'abcde',
+                    details: searchResult.getValue('internalid')
+                });
+                log.debug({
+                    title: 'i',
+                    details: searchResult.getValue('custrecord_service_description')
+                });
+                sublistPricing.setSublistValue({ id: 'service_record_internalid', line: i, value: searchResult.getValue('internalid') });
+                sublistPricing.setSublistValue({ id: 'service_category', line: i, value: searchResult.getValue('custrecord_service_category') });
+                sublistPricing.setSublistValue({ id: 'item', line: i, value: searchResult.getValue('custrecord_service') });
 
-                sublistPricing.setSublistValue({ sublistId: 'service_record_internalid', fieldId: i + 1, line: searchResult.getValue('internalid') });
-                sublistPricing.setSublistValue({ sublistId: 'service_category', fieldId: i + 1, line: searchResult.getValue('custrecord_service_category') });
-                sublistPricing.setSublistValue({ sublistId: 'item', fieldId: i + 1, line: searchResult.getValue('custrecord_service') });
-                sublistPricing.setSublistValue({ sublistId: 'itemdescp', fieldId: i + 1, line: searchResult.getValue('custrecord_service_description') });
-                sublistPricing.setSublistValue({ sublistId: 'itemprice', fieldId: i + 1, line: searchResult.getValue('custrecord_service_price') });
-                sublistPricing.setSublistValue({ sublistId: 'itemqty', fieldId: i + 1, line: String(total_qty) });
-                sublistPricing.setSublistValue({ sublistId: 'itemaddqty', fieldId: i + 1, line: String(extra_total_qty) });
-                sublistPricing.setSublistValue({ sublistId: 'old_itemaddqty', fieldId: i + 1, line: String(extra_total_qty) });
+                if (!isNullorEmpty(searchResult.getValue('custrecord_service_description'))) {
+                    sublistPricing.setSublistValue({ id: 'itemdescp', line: i, value: searchResult.getValue('custrecord_service_description') });
 
+                }
+                sublistPricing.setSublistValue({ id: 'itemprice', line: i, value: searchResult.getValue('custrecord_service_price') });
+                sublistPricing.setSublistValue({ id: 'itemqty', line: i, value: String(total_qty) });
+                sublistPricing.setSublistValue({ id: 'itemaddqty', line: i, value: String(extra_total_qty) });
+                sublistPricing.setSublistValue({ id: 'old_itemaddqty', line: i, value: String(extra_total_qty) });
+
+                
                 i++;
                 return true;
             });
@@ -527,11 +556,14 @@
 
 
             
-            var sublistNewPricing = form.addSubList({ id: 'new_services', type: 'inlineeditor', label: 'Services', tab: 'custpage_new_pricing' });
+            var sublistNewPricing = form.addSublist({ id: 'new_services', type: 'inlineeditor', label: 'Services', tab: 'custpage_new_pricing' });
             sublistNewPricing.addField({ id: 'new_service_record_internalid', type: ui.FieldType.INTEGER , label: 'InternalID' }).updateDisplayType({
                 displayType: ui.FieldDisplayType.HIDDEN
             });
-            var service_type = sublistNewPricing.addField({ id: 'new_item', type: ui.FieldType.SELECT , label: 'Item' }).setMandatory(true);
+            var service_type = sublistNewPricing.addField({ id: 'new_item', type: ui.FieldType.SELECT , label: 'Item' });
+            
+            service_type.isMandatory = true;
+
             service_type.addSelectOption({ value: '', text: '' });
             if (context.request.parameters.service_cat != '1') {
                 var service_typeSearch = serviceTypeSearch(null, [3]);
@@ -540,8 +572,16 @@
             serviceTypeLoop(service_typeSearch, service_type);
 
             sublistNewPricing.addField({ id: 'new_description', type: 'text', label: 'Service Description' });
-            sublistNewPricing.addField({ id: 'new_itemprice', type: 'currency', label: 'Price (ex GST)' }).setMandatory(true);
-            sublistNewPricing.addField({ id: 'new_itemaddqty', type: 'text', label: 'New Quantity' }).setMandatory(true);
+            var new_itemprice_field = sublistNewPricing.addField({ id: 'new_itemprice', type: 'currency', label: 'Price (ex GST)' });
+            var new_itemaddqty_field = sublistNewPricing.addField({ id: 'new_itemaddqty', type: 'text', label: 'New Quantity' });
+
+            
+        
+            new_itemprice_field.isMandatory = true;
+
+            
+        
+            new_itemaddqty_field.isMandatory = true;
 
             if (context.request.parameters.service_cat == '1') {
                 form.addSubmitButton({
@@ -560,7 +600,7 @@
             
 
             //form.setScript('customscript_cl_add_service');
-            //form.clientScriptFileId = 4366712; //PROD = "". SB = ""
+            form.clientScriptFileId = 4736785; //PROD = "". SB = ""
             context.response.writePage(form);
     
         } else {
@@ -684,7 +724,7 @@
                     searched_jobs_extras.filters.push(search.createFilter({
                         name: 'custrecord_job_date_scheduled',
                         operator: search.Operator.ONORAFTER,
-                        values: format.parse({ value: context.request.parameters.start_date, type: format.Type.DATE })
+                        values: format.format({ value: context.request.parameters.start_date, type: format.Type.DATE })
                     }));
 
                     searched_jobs_extras.filters.push(search.createFilter({
@@ -772,15 +812,22 @@
      * @return {[type]}              [description]
      */
     function serviceTypeLoop(searchResult, option) {
-        for (var x = 0; x < searchResult.length; x++) {
-            if (searchResult[x].getValue('internalid') != 22) {
+        
+
+        var x = 0;
+        searchResult.run().each( function(search_res) {
+            
+            if (search_res.getValue('internalid') != 22) {
                 option.addSelectOption({​​​​​
-                    value: searchResult[x].getValue('internalid'),
-                    text: searchResult[x].getValue('name'),
+                    value: search_res.getValue('internalid'),
+                    text: search_res.getValue('name'),
                 }​​​​​);
             }
 
-        }
+            x++;
+            return true;
+        })
+        
     }
 
  
@@ -837,6 +884,79 @@
         });
     }
 
+    function serviceTypeSearch(service_type_id, service_cat){
+        var filters = new Array();
+        if(!isNullorEmpty(service_type_id)){
+            filters[filters.length] = search.createFilter({
+                name: 'custrecord_service_type_ns_item',
+                operator: search.Operator.IS,
+                values: service_type_id,
+            });
+        }
+        if(!isNullorEmpty(service_cat)){
+            filters[filters.length] = search.createFilter({
+                name: 'custrecord_service_type_category',
+                operator: search.Operator.ANYOF,
+                values: service_cat,
+            });
+        }
+       
+        
+        var columns = new Array();
+        columns[0] = search.createColumn({
+            name: 'internalid',
+        });
+        columns[1] = search.createColumn({
+            name: 'custrecord_service_type_ns_item_array',
+        });
+        columns[2] = search.createColumn({
+            name: 'name',
+        });
+    
+        var service_type_search = search.create({
+            type: 'customrecord_service_type',
+            filters: filters,
+            columns: columns,
+        });
+    
+        if(isNullorEmpty(service_type_search)){
+             var filters = new Array();
+            // filters[0] = new nlobjSearchFilter('custrecord_service_type_ns_item', null, 'is', service_type_id);
+              service_type_id = service_type_id+',';
+            filters[filters.length] = search.createFilter({
+                name: 'custrecord_service_type_ns_item_array',
+                operator: search.Operator.CONTAINS,
+                values: service_type_id,
+            });
+           if(!isNullorEmpty(service_cat)){
+            filters[filters.length] = search.createFilter({
+                name: 'custrecord_service_type_category',
+                operator: search.Operator.ANYOF,
+                values: service_cat,
+            });
+        }
+    
+            var columns = new Array();
+            columns[0] = search.createColumn({
+                name: 'internalid',
+            });
+            columns[1] = search.createColumn({
+                name: 'custrecord_service_type_ns_item_array',
+            });
+    
+            var service_type_search2 = search.create({
+                type: 'customrecord_service_type',
+                filters: filters,
+                columns: columns,
+            });
+    
+           
+            return service_type_search2;
+        }
+    
+    
+        return service_type_search;
+    }
      function isNullorEmpty(strVal) {
          return (strVal == null || strVal == '' || strVal == 'null' || strVal == undefined || strVal == 'undefined' || strVal == '- None -');
      }

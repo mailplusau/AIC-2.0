@@ -58,17 +58,17 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
         return className;
     }
 
-    function onRequest() {  
+    function onRequest(context) {  
     
         var baseURL = 'https://1048144.app.netsuite.com';
-        if (runtime.EnvType == "SANDBOX") {
+        if (runtime.envType == "SANDBOX") {
             baseURL = 'https://1048144-sb3.app.netsuite.com';
         }
         var role = runtime.getCurrentUser().role;
         var ctx = runtime.getCurrentScript();
-        var zee = ctx.getUser();
+        var zee = runtime.getCurrentUser()
         
-        var currRec = currentRecord.get();
+        //var currRec = currentRecord.get();
 
         var status = null;
 
@@ -371,7 +371,7 @@ function(ui, email, runtime, search, record, http, log, redirect, format) {
                 function: 'onclick_reset()'
             });
 
-            form.clientScriptFileId = //; // GET THE CLIENT ID
+            form.clientScriptFileId = 4736786//; // GET THE CLIENT ID
 
             context.response.writePage(form);
 

@@ -45,9 +45,16 @@
          * [pageInit description] - On Page initialization, form arrays to mnake sure that the duplication of the services/extras does not happen.
          */
         function pageInit() {
+            console.log("test", baseURL);
+            //$("#pageContainer").css("background-color", "#CFE0CE");
+            //$("#div__body").css("background-color", "#CFE0CE");
+            //$("#body").css("background-color", "#CFE0CE");
+
+            
+            
             var currentScript = currentRecord.get();
 
-            var service_cat = currentScript.getValue({ fieldId: service_cat });
+            var service_cat = currentScript.getValue({ fieldId: 'service_cat' });
 
             if (service_cat == 1) {
                 var searched_jobs = search.load({
@@ -66,7 +73,7 @@
             searched_jobs.filters.push(search.createFilter({
                 name: 'custrecord_service_customer',
                 operator: search.Operator.IS,
-                values: currentScript.getValue({ fieldId: customer }),
+                values: currentScript.getValue({ fieldId: 'customer' }),
             }));
 
             if (service_cat != 1) {
@@ -98,18 +105,26 @@
                 return true;
             });
 
+
             
-            for (y = 1; y <= currentScript.getLineCount({ sublistId: 'services' }); y++) {
+
+            for (y = 0; y <= currentRecord.get().getLineCount({ sublistId: 'services' }); y++) {
                 
-                var lineItem = currentScript.getSublistField({
+                var lineItem = currentScript.getCurrentSublistValue({
                     sublistId: 'services',
                     fieldId: 'itemprice',
                     line: y
                 });
 
                 lineItem.isDisabled = true;
-                //nlapiSetLineItemDisabled('services', 'itemprice', true, y);
             }
+
+
+
+            // for (y = 1; y <= nlapiGetLineItemCount('services'); y++) {
+            //     nlapiSetLineItemDisabled('services', 'itemprice', true, y);
+            // }
+
         }
 
         //Validate delete of service items. The service records are made inactive as requested by Will.
@@ -828,6 +843,7 @@
          * @return {String}             
          */
         function serviceDescription(description) {
+            console.log('de', description)
             if (isNullorEmpty(description)) {
                 description = 0;
             } else {
@@ -879,6 +895,7 @@
         return {
             pageInit: pageInit,
             saveRecord: saveRecord,
+            onclick_Back: onclick_Back,
             
         };  
     }

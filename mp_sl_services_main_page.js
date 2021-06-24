@@ -9,8 +9,8 @@
  */
 
 
- define(['N/ui/serverWidget', 'N/email', 'N/runtime', 'N/search', 'N/record', 'N/http', 'N/log', 'N/redirect', 'N/format'], 
- function(ui, email, runtime, search, record, http, log, redirect, format) {
+ define(['N/ui/serverWidget', 'N/email', 'N/runtime', 'N/search', 'N/record', 'N/http', 'N/log', 'N/redirect', 'N/format', 'N/task'], 
+ function(ui, email, runtime, search, record, http, log, redirect, format, task) {
      var baseURL = 'https://1048144.app.netsuite.com';
      if (runtime.EnvType == "SANDBOX") {
          baseURL = 'https://1048144-sb3.app.netsuite.com';
@@ -164,16 +164,26 @@
             form.addField({ id: 'new_service_discount_type_string', type: ui.FieldType.TEXT, label: 'new_service_discount_type_string' }).updateDisplayType({ displayType: ui.FieldDisplayType.HIDDEN });
             form.addField({ id: 'new_service_single_line_string', type: ui.FieldType.TEXT, label: 'new_service_single_line_string' }).updateDisplayType({ displayType: ui.FieldDisplayType.HIDDEN });
 
-            var inlinehtml2 = '<div class="se-pre-con"></div><button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo">Click for Instructions</button><div id="demo" style="background-color: #cfeefc !important;border: 1px solid #417ed9;padding: 10px 10px 10px 20px;width:98%;position:absolute" class="collapse"><b><u>Important Instructions:</u></b><ul><li><b>Review - Modify Invoice Qty using App Jobs</b><ul><li>Allows for better trace-ability as each Quantity invoiced can be traced to an in-field activity</li><li>For <b style="co';
+            //var inlinehtml2 = '<div class="se-pre-con"></div>';
+            
+            var inlinehtml2 = '<button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo" style="background-color: #FBEA51; color: #103D39; font-weight: 700; border-color: transparent; border-width: 2px; border-radius: 15px; height: 30px">Click for Instructions</button>';
+            // inlinehtml2 += '<button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo" style="background-color: #FBEA51; color: #103D39; font-weight: 700; border-color: transparent; border-width: 2px; border-radius: 15px; height: 30px">Click for Instructions</button><div id="demo" style="background-color: #e3e8e5 !important;border: 1px solid #379E8F;padding: 10px 10px 10px 20px;width:96%;position:absolute" class="collapse">';
+
+
+            inlinehtml2 += '<div id="demo" style="background-color: #e3e8e5 !important;border: 1px solid #379E8F;padding: 10px 10px 10px 20px;width:98%;position:absolute" class="collapse"><b><u>Important Instructions:</u></b><ul><li><b>Review - Modify Invoice Qty using App Jobs</b><ul><li>Allows for better trace-ability as each Quantity invoiced can be traced to an in-field activity</li><li>For <b style="co';
             inlinehtml2 += 'lor:#5cb85c;">Completed</b> Jobs, set those you dont want to be calculated as part of the invoice quantity as <b>No</b></li><li>For <b style="color:#337ab7;">Partial</b>, <b style="color:#d9534f;">Incomplete</b> or <b style="color:#f0ad4e;">Scheduled</b> Jobs, set those you want to be calculated as part of the invoice quantity as <b>Yes</b></li><li>Total Invoiceable Quantity cannot be less than the Invoiceable Quantity that comes from the App. Modify the Invoice Quantity using the App Jobs.</li></ul></li><li><b>Add Services</b> - Allows users to add services not capture';
             inlinehtml2 += 'd in the App</li><li><b>Add Extras</b> - Allows users to add extras not captured in the App</li><li><button type="button" class="btn btn-xs glyphicon glyphicon-plus" style="color: black;margin-bottom: 4px;" disabled></button> - Click to view Quantities that come from the App and distribution of the Total Invoiceable Quantity</li><li><button type="button" class="btn btn-xs glyphicon glyphicon-minus" style="color: black;margin-bottom: 4px;" disabled></button> - Click to collapse all the columns</li><li><button type="button" id="add_service" name="add_service" class="btn btn-xs btn-success" style="margin-bottom: 4px;" disabled>1<span class="badge" style="font-size: 10px;color: #a94342;background-color: #f2dede;border-style: solid;border-width: thin;">-1</span></button> - <span class="badge" style="font-size: 10px;color: #a94342;background-color: #f2dede;border-style: solid;border-width: thin;">-1</span> Sho';
             inlinehtml2 += 'ws the number of Jobs that have been made \"Invoiceable\" <b>NO</b></li><li><button type="button" id="add_service" name="add_service" value="1" class="btn btn-xs btn-primary" disabled>1<span class="badge" style="font-size: 10px;color: #5bb95b;background-color: #e0f1d8;font-weight: bolder;border-style: solid;border-width: thin;">+1</span></button> / <button type="button" id="add_service" name="add_service" value="1" class="btn btn-xs btn-danger" disabled>1<span class="badge" style="font-size: 10px;color: #5bb95b;background-color: #e0f1d8;font-weight: bolder;border-style: solid;border-width: thin;">+1</span></button> - <span class="badge" style="font-size: 10px;color: #5bb95b;background-color: #e0f1d8;font-weight: bolder;border-style: solid;border-width: thin;">+1</span> Shows the number of Jobs that have been made \"Invoiceable\" <b>YES</b></li></ul></div>';
 
-            form.addField({ id: 'custpage_html2', type: ui.FieldType.INLINEHTML }).updateLayoutType({layoutType: ui.FieldLayoutType.OUTSIDEABOVE, padding: 1}).defaultValue = inlinehtml2;
+            
+            form.addField({ id: 'custpage_html2', type: ui.FieldType.INLINEHTML, label: 'preview_html' }).updateLayoutType({layoutType: ui.FieldLayoutType.OUTSIDEABOVE }).defaultValue = inlinehtml2;
+            
             // nlapiLogExecution('DEBUG', 'start_Date', nlapiStringToDate(context.request.parameters.start_date));
 
             //INITIALIZATION OF JQUERY AND BOOTSTRAP
-            var inlineQty = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"><script src="//code.jquery.com/jquery-1.11.0.min.js"></script><link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"><link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"><script src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script></script><link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css"><br><br><style>table#stockcount {font-size:12px; text-align:center; border-color: #24385b} </style><div class="se-pre-con"></div><div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true"><div class="modal-dialog modal-sm" role="docu';
+            var inlineQty = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"><script src="//code.jquery.com/jquery-1.11.0.min.js"></script><link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"><link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"><script src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script></script><link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css"><br><br><style>table#stockcount {font-size:12px; text-align:center; border-color: #24385b} </style>';
+            //inlineQty += '<div class="se-pre-con"></div>';
+            inlineQty +='<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true"><div class="modal-dialog modal-sm" role="docu';
             inlineQty += 'ment"><div class="modal-content" style="width: fit-content;width: -moz-fit-content;"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h5 class="modal-title panel panel-info" id="exampleModalLabel">Information</h5></div><div class="modal-body"></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div></div></div></div><div class="table-responsive table_start"><table border="0" cellpadding="10" id="stockcount" cellspacing="0" class="table table-striped" style="width: 98%;position: absolute;">';
             inlineQty += '';
 
@@ -234,8 +244,8 @@
             searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_service_package', operator: search.Operator.NONEOF, values: '@NONE@' }));
             if (!isNullorEmpty(context.request.parameters.start_date) && !isNullorEmpty(context.request.parameters.end_date)) {
 
-                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: format.parse({ value: context.request.parameters.start_date, type: format.Type.DATE }) }));
-                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: format.parse({ value: context.request.parameters.end_date, type: format.Type.DATE }) }));
+                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: format.format({ value: context.request.parameters.start_date, type: format.Type.DATE }) }));
+                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: format.format({ value: context.request.parameters.end_date, type: format.Type.DATE }) }));
                 
             }
 
@@ -330,8 +340,8 @@
 
 
                 //START OF THE TABLE
-                // inlineQty += '<thead style="color: white;background-color: #607799;"><tr><td></td>'; Assign Package Col commented
-                inlineQty += '<thead style="color: white;background-color: #607799;"><tr>';
+                // inlineQty += '<thead style="color: white;background-color: #379E8F;"><tr><td></td>'; Assign Package Col commented
+                inlineQty += '<thead style="color: white;background-color: #379E8F;"><tr>';
                 inlineQty += '<td></td><td></td><td></td>';
                 inlineQty += '<td colspan="4" class="header_collapse"><b>APP QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Quantities come from the App"></span><button type="button" class="btn btn-xs glyphicon glyphicon-minus collapse_all" style="color: black;margin-bottom: 4px;" data-toggle="tooltip" data-placement="top" title="Collapse Columns"></button></b></td>';
                 inlineQty += '<td colspan="3" class="header_invoiceable_qty_collpase"><b>INVOICEABLE QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Quantity taken for Invoicing Purposes"></span></b></td><td></td></tr>';
@@ -469,6 +479,10 @@
                                 // inlineQty += assignPackageRows;
     
                                 var serviceNameRow = serviceName(old_service_id);
+                                log.debug({
+                                    title: 'serviceNameRow1',
+                                    details: serviceNameRow
+                                })
                                 inlineQty += serviceNameRow;
     
                                 //IF INVOICE SINGLE LINE ARE NULL
@@ -1078,8 +1092,8 @@
             searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_service_package', operator: search.Operator.ANYOF, values: '@NONE@' }));
             if (!isNullorEmpty(context.request.parameters.start_date) && !isNullorEmpty(context.request.parameters.end_date)) {
 
-                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: format.parse({ value: context.request.parameters.start_date, type: format.Type.DATE }) }));
-                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: format.parse({ value: context.request.parameters.end_date, type: format.Type.DATE }) }));
+                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: format.format({ value: context.request.parameters.start_date, type: format.Type.DATE }) }));
+                searched_jobs.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: format.format({ value: context.request.parameters.end_date, type: format.Type.DATE }) }));
             }
 
             if (!isNullorEmpty(scID)) {
@@ -1091,15 +1105,15 @@
 
             var resultSet = searched_jobs.run();
 
-            var serviceResult = ResultSet.getRange({
+            var serviceResult = resultSet.getRange({
                 start: 0,
                 end: 1
             });
 
             if (serviceResult.length != 0) {
                 //SERVICES SECTION
-                // inlineQty += '<thead style="color: white;background-color: #607799;"><tr><td></td><td></td><td></td><td></td>'; Assign PAckage Col commented
-                inlineQty += '<thead style="color: white;background-color: #607799;"><tr><td></td><td></td><td></td>';
+                // inlineQty += '<thead style="color: white;background-color: #379E8F;"><tr><td></td><td></td><td></td><td></td>'; Assign PAckage Col commented
+                inlineQty += '</tbody><thead style="color: white;background-color: #379E8F;"><tr><td></td><td></td><td></td>';
                 inlineQty += '<td colspan="4" class="header_collapse"><b>APP QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Quantities come from the App"></span><button type="button" class="btn btn-xs glyphicon glyphicon-minus collapse_all" style="color: black;margin-bottom: 4px;" data-toggle="tooltip" data-placement="top" title="Collapse Columns"></button></b></td>';
                 inlineQty += '<td colspan="3" class="header_invoiceable_qty_collpase"><b>INVOICEABLE QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Quantity taken for Invoicing Purposes"></span></b></td><td></td></tr>';
                 inlineQty += '<tr style="font-size: smaller;">';
@@ -1114,7 +1128,7 @@
                 inlineQty += '<td class="invoiceable_qty_collpase">APP QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Invoiceable Quantity from the App"></span></td>';
                 inlineQty += '<td class="invoiceable_qty_collpase">NETSUITE QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Invoiceable Quantity created in NetSuite"></span></td>';
                 inlineQty += '<td class="col-sm-1">TOTAL QTY <span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Total Invoiceable Quantity which is the summation of the App Quantity and Netsuite Quantity"></span> <button type="button" class="btn btn-xs glyphicon glyphicon-plus collapse_appqty" style="color: black;margin-bottom: 4px;" data-toggle="tooltip" data-placement="top" title="App Qtys"></button></td>';
-                inlineQty += '<td class="col-sm-2">INVOICEABLE AMT <small>(exc. GST)</small><span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Total Amount for that Service. Excluding GST"></span></td></tr></thead>';
+                inlineQty += '<td class="col-sm-2">INVOICEABLE AMT <small>(exc. GST)</small><span class="modal_display glyphicon glyphicon-info-sign" style="padding: 3px 3px 3px 3px;color: orange;cursor: pointer;" data-whatever="Total Amount for that Service. Excluding GST"></span></td></tr></thead><tbody>';
 
                 //INITIALIZATION OF THE VARIABLE FOR THE SERVICES SECTION
                 var completed_qty = 0;
@@ -1559,7 +1573,7 @@
                 
 
                 //BUTTON TO ADD SERVICES
-                inlineQty += '<tr><td colspan="11"><input type="button" id="add_service" name="add_service" value="Add Services" onclick="addService(\'1\')" class="btn btn-default active add_services"> </td></tr><tr><td> </td></tr>';
+                inlineQty += '<tr><td colspan="11"><input type="button" id="add_service" name="add_service" value="Add Services" fnparam="1" onclick="" class="btn btn-default active add_services"> </td></tr><tr><td> </td></tr>';
 
 
             }
@@ -1576,10 +1590,9 @@
                 type: 'customrecord_job'
             });
 
-            searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_operator_franchisee',
-                operator: search.Operator.ANYOF,
-                values: zee,
-            }))
+            // if (!isNullorEmpty(zee)) {
+            //     searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_operator_franchisee', operator: search.Operator.ANYOF, values: zee }));
+            // }
 
             searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_job_customer', operator: search.Operator.IS, values: customer_id } ));
  
@@ -1587,8 +1600,8 @@
             searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_job_service_package', operator: search.Operator.ANYOF, values: '@NONE@' }));
             if (!isNullorEmpty(context.request.parameters.start_date) && !isNullorEmpty(context.request.parameters.end_date)) {
 
-                searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: format.parse({ value: context.request.parameters.start_date, type: format.Type.DATE }) }));
-                searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: format.parse({ value: context.request.parameters.end_date, type: format.Type.DATE }) }));
+                searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORAFTER, values: format.format({ value: context.request.parameters.start_date, type: format.Type.DATE }) }));
+                searched_jobs_extras.filters.push(search.createFilter({ name: 'custrecord_job_date_scheduled', operator: search.Operator.ONORBEFORE, values: format.format({ value: context.request.parameters.end_date, type: format.Type.DATE }) }));
 
             }
 
@@ -1606,11 +1619,11 @@
             });
 
             //EXTRAS SECTION
-            // inlineQty += '<thead style="color: white;background-color: #607799;"><tr><td></td>'; Assign Package col commented
-            inlineQty += '<thead style="color: white;background-color: #607799;"><tr>';
+            // inlineQty += '<thead style="color: white;background-color: #379E8F;"><tr><td></td>'; Assign Package col commented
+            inlineQty += '</tbody><thead style="color: white;background-color: #379E8F;"><tr>';
             inlineQty += '<td></td><td></td><td></td><td colspan="4" class="header_collapse"><b>APP QTY </button></b></td><td colspan="3" class="header_invoiceable_qty_collpase"><b>INVOICEABLE QTY</b></td><td></td></tr><tr style="font-size: smaller;">';
             // inlineQty += '<td>ASSIGN PACKAGE</td>';
-            inlineQty += '<td>SERVICE </td><td class="col-sm-2">INVOICE DETAILS</td><td class="col-sm-2">RATE</td><td colspan="4" class="col-sm-1 col_collapse_appqty">COMPLETED</td><td class="invoiceable_qty_collpase">APP QTY</td><td class="invoiceable_qty_collpase">NETSUITE QTY</td><td class="col-sm-1">TOTAL QTY <button type="button" class="btn btn-xs glyphicon glyphicon-plus collapse_appqty" style="color: black;margin-bottom: 4px;" ></button></td><td class="col-sm-2">INVOICEABLE AMT <small>(exc. GST)</small></td></tr></thead>';
+            inlineQty += '<td>SERVICE </td><td class="col-sm-2">INVOICE DETAILS</td><td class="col-sm-2">RATE</td><td colspan="4" class="col-sm-1 col_collapse_appqty">COMPLETED</td><td class="invoiceable_qty_collpase">APP QTY</td><td class="invoiceable_qty_collpase">NETSUITE QTY</td><td class="col-sm-1">TOTAL QTY <button type="button" class="btn btn-xs glyphicon glyphicon-plus collapse_appqty" style="color: black;margin-bottom: 4px;" ></button></td><td class="col-sm-2">INVOICEABLE AMT <small>(exc. GST)</small></td></tr></thead><tbody>';
 
 
             //INITIALIZATION OF THE VARIABLES FOR THE EXTRAS SECTION 
@@ -1661,6 +1674,31 @@
                 var ns_item_id = searchResult_extras.getValue({ name: 'custrecord_service_ns_item', join: 'CUSTRECORD_JOB_SERVICE', summary: search.Summary.GROUP });
                 var gst = searchResult_extras.getText({ name: 'custrecord_service_gst', join: 'CUSTRECORD_JOB_SERVICE', summary: search.Summary.GROUP });
 
+                log.debug({
+                    title: 'service_type_id',
+                    details: service_type_id
+                });
+
+                log.debug({
+                    title: 'extras_count',
+                    details: extras_count
+                });
+
+                log.debug({
+                    title: 'old_service_type_id',
+                    details: old_service_type_id
+                });
+
+                log.debug({
+                    title: 'old_extra_service_id',
+                    details: old_extra_service_id
+                });
+
+                log.debug({
+                    title: 'service_id',
+                    details: service_id
+                });
+
                 if (service_type_id == 22) {
                     admin_fees_job_id = netsuite_job_internalid;
                     admin_fees_job_qty = extra_service_qty;
@@ -1699,6 +1737,11 @@
                     // inlineQty += '<tr><td></td>'; Assign Package Col commented
                     inlineQty += '<tr>';
                     var serviceNameRow = serviceName(old_extra_service_id);
+
+                    log.debug({
+                        title: 'serviceNameRow',
+                        details: serviceNameRow
+                    })
                     inlineQty += serviceNameRow;
                     inlineQty += '<td><input type="text" class="form-control job_description job_description_preview text-center" data-serviceid="' + old_extra_service_id + '" data-packageid="' + null + '" value="' + old_job_detail + '" data-netsuitejob="' + old_netsuite_job_internalid + '" default-value="' + old_job_detail + '"/></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="text" class="form-control text-center" readonly value="' + (old_extra_service_rate) + '" /></div></td>';
                     if (completed_extras > 0) {
@@ -1883,16 +1926,16 @@
 
             // nlapiLogExecution('AUDIT', 'end', total_invoice);
             //BUTTON TO ADD EXTRAS (Assign Package Col included then colspan = 12)
-            inlineQty += '<tr><td colspan="11"><input type="button" id="add_service" name="add_service" value="Add Extras" onclick="addService(\'3\')" class="btn btn-default active add_services"> </td></tr>';
+            inlineQty += '<tr><td colspan="11"><input type="button" id="add_service" name="add_service" value="Add Extras" fnparam="3" onclick="" class="btn btn-default active add_services"> </td></tr>';
 
             // }
 
 
             //TOTAL INVOICE VALUE
-            inlineQty += '<tr style="font-weight: bold;color: white;background-color: #607799;"><td colspan="3"></td><td colspan="4" class="invoicetotalheader_collpase_appqty"></td><td colspan="2" class="invoiceable_qty_collpase"></td><td></td><td>TOTAL INVOICE <small>(exc. GST)</small></td></tr>';
+            inlineQty += '<tr style="font-weight: bold;color: white;background-color: #379E8F;"><td colspan="3"></td><td colspan="4" class="invoicetotalheader_collpase_appqty"></td><td colspan="2" class="invoiceable_qty_collpase"></td><td></td><td>TOTAL INVOICE <small>(exc. GST)</small></td></tr>';
             inlineQty += '<tr><td><button class="btn btn-primary btn-sm preview_row " type="button" data-toggle="tooltip" data-placement="right" ">Preview Invoice <span class="glyphicon glyphicon-new-window"></span></button></td><td colspan="2"></td><td colspan="4" class="invoicetotalheader_collpase_appqty"></td><td colspan="2" class="invoiceable_qty_collpase"></td><td></td><td><strong><div class="input-group has-success"><span class="input-group-addon">$</span><input type="text" class="form-control total_value text-center" readonly value="' + parseFloat((total_invoice)).toFixed(2) + '" /></div><strong></td></tr>';
             inlineQty += '</tbody>';
-            inlineQty += '</table><br/><br/></div>';
+            inlineQty += '</table></div><br><br/></div>';
 
             form.addField({
                 id: 'preview_table_extras',
@@ -1926,7 +1969,7 @@
                 functionName : 'onclick_reset()'
             });
 
-            //form.clientScriptFileId = ; //SB cl_id =, PROD cl_id = 
+            form.clientScriptFileId = 4736990; //SB cl_id = 4736990, PROD cl_id = 4736990
             context.response.writePage(form);
 
             var end_time = Date.now();
@@ -2013,7 +2056,7 @@
             }
 
 
-            var recCustomer = record.load({ type: 'customer', id: customer });
+            var recCustomer = record.load({ type: record.Type.CUSTOMER, id: customer });
 
             if (!isNullorEmpty(extra_service_string) && !isNullorEmpty(extra_qty_string)) {
                 var extra_service = extra_service_string.split(',');
@@ -2146,16 +2189,28 @@
 
             // To check if the deployments are not in "INPROGRESS" / "INQUEUE" state. If it is, goes to the next available deplyment.
             for (var x = 1; x <= 10; x++) {
-                var status = task.create({
+                var ss = task.create({
                     taskType: task.TaskType.SCHEDULED_SCRIPT,
                     deploymentId: 'customdeploy' + x,
                     params: params3,
-                    scriptId: 'customscript_ss_set_date_review_2',
+                    scriptId: 'customscript_sc_set_date_review',
                 });
 
-                status.submit();
+                var ssId = ss.submit();
 
-                if (status == 'QUEUED') {
+
+                // Check the status
+                var myTaskStatus = task.checkStatus({
+                    taskId: ssId
+                });
+
+                log.debug({
+                    title: 'myTaskStatus',
+                    details: myTaskStatus.status
+                })
+
+                
+                if (myTaskStatus.status == 'QUEUED') {
 
                     //WS Edit: Updated search to be consistent with that used in summary page
                     //var searched_jobs_extras = nlapiLoadSearch('customrecord_job', 'customsearch_job_invoicing_summary');
@@ -2196,6 +2251,15 @@
                         end: 1
                     });
 
+                    log.debug({
+                        title: 'result.length',
+                        details: result.length
+                    })
+
+                    log.debug({
+                        title: 'review_button',
+                        details: review_button
+                    })
                     if (result.length != 0 && review_button == "F") {
                         var internal_id = result[0].getValue({ name: 'internalid', join: 'CUSTRECORD_JOB_CUSTOMER', summary: search.Summary.GROUP });
 
@@ -2205,14 +2269,17 @@
                         params['end_date'] = context.request.parameters.end_date;
                         params['zee'] = context.request.parameters.zee_id;
 
-                        redirect.toSuitelet({ scriptId: 'customscript_sl_services_main_page', deploymentId: 'customdeploy_sl_services_main_page', parameters: params });
+                        redirect.toSuitelet({ scriptId: 'customscript_sl_services_main_page_2', deploymentId: 'customdeploy_sl_services_main_page_2', parameters: params });
                     } else {
                         var params = new Array();
                         params['start_date'] = context.request.parameters.start_date;
                         params['end_date'] = context.request.parameters.end_date;
                         params['zee'] = context.request.parameters.zee_id;
 
-                        redirect.toSuitelet({ scriptId: 'customscript_sl_summary_page', deploymentId: 'customdeploy_summary_page', parameters: params });
+                        log.debug({
+                            title: 'testing if sum reloads',
+                        });
+                        redirect.toSuitelet({ scriptId: 'customscript_sl_summary_page_2', deploymentId: 'customdeploy_sl_summary_page_2', parameters: params });
                     }
                     break;
                 }
@@ -2251,8 +2318,18 @@
     }
 
     function serviceName(old_service_id) {
-        var rows = '<td style="font-size: initial; font-weight: bold;">' + search.lookupFields({ type: 'customrecord_service', id: old_service_id, columns: 'name' }) + '</td>';
+        var rows = '<td style="font-size: initial; font-weight: bold;">' + search.lookupFields({ type: 'customrecord_service', id: old_service_id, columns: ['name'] })['name'] + '</td>';
+        log.debug({
+            title: 'servName2',
+            details: rows
+        });
+
+        log.debug({
+            title: 'servName3',
+            details: search.lookupFields({ type: 'customrecord_service', id: old_service_id, columns: ['name'] })['name']
+        })
         return rows;
+    
     }
 
     function fixedRateSection(inlineQty, total_package, old_invoiceable_qty, old_service_rate, discount_job_price, fixed_rate_value, period_type, discount_job_extras_qty, discount_job_single_line, discount_job_id, old_package, discount_job_detail, invoice_single_line, total_invoice) {
@@ -2388,6 +2465,8 @@
         returnValues[returnValues.length] = fixed_rate_value;
         return returnValues;
     }
+    
+
     
     function completedJobs(assign_package, completed_icon, old_service_qty, customer_id, old_service_rate, old_service_id, old_job_group, old_service_cat_text, old_package, old_service_qty, invoiceable_completed_count) {
         var rows = '';
@@ -2753,6 +2832,24 @@
         });
 
     }
+
+    /**
+     * [getDate description] - To get the current date (Suitlet)
+     * @return {string} String of the current date
+     */
+    function getDate() {
+        var date = new Date();
+        if (date.getHours() > 6) {
+            date.setDate(date.getDate() + 1);
+        }
+        date = format.parse({
+            value: date,
+            type: format.Type.DATE
+        });
+
+        return date;
+    }
+
     function isNullorEmpty(strVal) {
         return (strVal == null || strVal == '' || strVal == 'null' || strVal == undefined || strVal == 'undefined' || strVal == '- None -');
     }

@@ -12,7 +12,7 @@
  define(['N/ui/serverWidget', 'N/email', 'N/runtime', 'N/search', 'N/record', 'N/http', 'N/log', 'N/redirect', 'N/format'], 
  function(ui, email, runtime, search, record, http, log, redirect, format) {
     var baseURL = 'https://1048144.app.netsuite.com';
-    if (runtime.EnvType == "SANDBOX") {
+    if (runtime.envType == "SANDBOX") {
         baseURL = 'https://1048144-sb3.app.netsuite.com';
     }
     var zee = 0;
@@ -62,11 +62,15 @@
             inlinehtml2 += '<link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css">';
 
             //inlinehtml2 += '<div class="se-pre-con"></div>
-            // inlinehtml2 += '<button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo">Click for Instructions</button><div id="demo" style="background-color: #cfeefc !important;border: 1px solid #417ed9;padding: 10px 10px 10px 20px;width:96%;position:absolute" class="collapse">';
-            // inlinehtml2 += '<b><u>Important Instructions:</u></b><ul><li>Click headers to sort. Hold <b><i>"Shift"</i></b> and click another column to sort according to multiple columns.</li><li>Can search for specific customer by typing into the Search bar</li><li><input class="btn-xs btn-default" type="button" value="START REVIEW" disabled> - Click to <b>Start</b> the Invoice Review for the Customer</li><li><input class="btn-xs btn-default" type="button" value="CONTINUE REVIEW" disabled> - Click to <b>Continue</b> the Invoice Review Pro';
-            // inlinehtml2 += 'cess</li><li><input class="btn-xs btn-primary" type="button" value="FINALISE" disabled> - Click when all the Customer\'s Invoice has been reviewed and its ready for Invoicing</li><li><b>ACTIONS</b> reveals the stage of the review process for each customer: <ul><li><input class="btn-xs btn-danger" type="button" value="REVIEW" disabled> - New <b>activities</b> from Mailplus GO app are available for review.</li><li><input class="btn-xs btn-primary" type="button" value="EDIT" disabled> - All <b>activities</b> from Mailplus GO app are reviewed, up-to-date and can be edited.</li><li><input class="btn-xs btn-info" type="button" value="FINALISED" disabled> <small><b>(LOCKED)</b></small> - All activities from Mailplus GO app are finalised for invoicing</li></li><li><input class="btn-xs btn-success active" type="button" value="INVOICED" disable';
-            // inlinehtml2 += 'd> <small><b>(LOCKED)</b></small> - Invoice has been automatically created using activities from Mailplus GO app. </li><li><input class="btn-xs btn btn-default" type="button" value="CUSTOM INVOICE" disabled> <small><b>(LOCKED)</b></small> - Invoice has been generated without the use of activities from Mailplus GO app.</ul></li></ul></div>';
-            // inlinehtml2 += '<div class="col-xs-4 admin_section" style="width: 20%;left: 40%;position: absolute;"><label class="control-label">Invoicing Month <span class="glyphicon glyphicon-asterisk" style="font-size: 5px;top: -5px;color: red;"></span></label>';
+            inlinehtml2 += '<button type="button" class="btn btn-sm btn-info instruction_button" data-toggle="collapse" data-target="#demo" style="background-color: #379E8F">Click for Instructions</button><div id="demo" style="background-color: #e3e8e5 !important;border: 1px solid #379E8F;padding: 10px 10px 10px 20px;width:96%;position:absolute" class="collapse">';
+            inlinehtml2 += '<b><u>Important Instructions:</u></b><ul><li>Click headers to sort. Hold <b><i>"Shift"</i></b> and click another column to sort according to multiple columns.</li><li>Can search for specific customer by typing into the Search bar</li><li><input class="btn-xs btn-default" type="button" value="START REVIEW" disabled> - Click to <b>Start</b> the Invoice Review for the Customer</li><li><input class="btn-xs btn-default" type="button" value="CONTINUE REVIEW" disabled> - Click to <b>Continue</b> the Invoice Review Pro';
+            inlinehtml2 += 'cess</li><li><input class="btn-xs btn-primary" type="button" value="FINALISE" disabled> - Click when all the Customer\'s Invoice has been reviewed and its ready for Invoicing</li><li><b>ACTIONS</b> reveals the stage of the review process for each customer: <ul><li><input class="btn-xs btn-danger" type="button" value="REVIEW" disabled> - New <b>activities</b> from Mailplus GO app are available for review.</li><li><input class="btn-xs btn-primary" type="button" value="EDIT" disabled> - All <b>activities</b> from Mailplus GO app are reviewed, up-to-date and can be edited.</li><li><input class="btn-xs btn-info" type="button" value="FINALISED" disabled> <small><b>(LOCKED)</b></small> - All activities from Mailplus GO app are finalised for invoicing</li></li><li><input class="btn-xs btn-success active" type="button" value="INVOICED" disable';
+            inlinehtml2 += 'd> <small><b>(LOCKED)</b></small> - Invoice has been automatically created using activities from Mailplus GO app. </li><li><input class="btn-xs btn btn-default" type="button" value="CUSTOM INVOICE" disabled> <small><b>(LOCKED)</b></small> - Invoice has been generated without the use of activities from Mailplus GO app.</ul></li></ul></div>';
+
+            inlinehtml2 += '<div class="col-xs-4 admin_section" style="width: 20%;left: 40%;position: absolute;"><label class="control-label">Invoicing Month <span class="glyphicon glyphicon-asterisk" style="font-size: 5px;top: -5px;color: red;"></span></label>';
+            // inlinehtml2 += '<button class="click_me" type="button">Click Me!</button>'
+            // inlinehtml2 += '<button class="click_me" type="button">Click Me2!</button>'
+
 
             var result = finalise_date();
 
@@ -170,40 +174,40 @@
             var zeeName = zee_record.getValue({ fieldId: 'entityid' });
             // inlinehtml2 += '</div>';
 
-            var inlineQty = '<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>';
-            // Load Tooltip
-            inlineQty += '<script src="https://unpkg.com/@popperjs/core@2"></script>';
+            // var inlineQty = '<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>';
+            // // Load Tooltip
+            // inlineQty += '<script src="https://unpkg.com/@popperjs/core@2"></script>';
 
-            // Load Bootstrap
-            inlineQty += '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">';
-            inlineQty += '<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>';
-            // Load DataTables
-            inlineQty += '<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">';
-            inlineQty += '<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>';
+            // // Load Bootstrap
+            // inlineQty += '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">';
+            // inlineQty += '<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>';
+            // // Load DataTables
+            // inlineQty += '<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">';
+            // inlineQty += '<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>';
 
-            // Load Bootstrap-Select
-            inlineQty += '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">';
-            inlineQty += '<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>';
+            // // Load Bootstrap-Select
+            // inlineQty += '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">';
+            // inlineQty += '<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>';
 
-            // Load Netsuite stylesheet and script
-            inlineQty += '<link rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2060796&c=1048144&h=9ee6accfd476c9cae718&_xt=.css"/>';
-            inlineQty += '<script src="https://1048144.app.netsuite.com/core/media/media.nl?id=2060797&c=1048144&h=ef2cda20731d146b5e98&_xt=.js"></script>';
-            inlineQty += '<link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css">';
+            // // Load Netsuite stylesheet and script
+            // inlineQty += '<link rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2060796&c=1048144&h=9ee6accfd476c9cae718&_xt=.css"/>';
+            // inlineQty += '<script src="https://1048144.app.netsuite.com/core/media/media.nl?id=2060797&c=1048144&h=ef2cda20731d146b5e98&_xt=.js"></script>';
+            // inlineQty += '<link type="text/css" rel="stylesheet" href="https://1048144.app.netsuite.com/core/media/media.nl?id=2090583&c=1048144&h=a0ef6ac4e28f91203dfe&_xt=.css">';
 
 
-            //inlineQty += '<div><style>table#stockcount {font-size:12px; font-weight:bold; text-align:center; border-color: #24385b;} </style><table border="0" cellpadding="10" id="stockcount" cellspacing="0" class="table table-responsive table-striped"><thead style="color: white;background-color: #607799;"><tr><td style="text-align:left;"><b>ID</b></td><td style="text-align:left;" class="col-sm-3"><b>CUSTOMER NAME</b></td><td><b>ACTION</b></td><td style="text-align:right;" class="col-sm-2"><b>EXPECTED INVOICE</b></td><td class="col-sm-2" style="text-align:right;"><b>EXPECTED DISTRIBUTION</b></td><td><b>LINK TO INVOICE</b></td></tr></thead><tbody>';
+            var inlineQty = '<div id ="results_table"><style>table#stockcount {font-size:12px; font-weight:bold; text-align:center; border-color: #24385b; background-color: white;} </style><table border="0" cellpadding="10" id="stockcount" cellspacing="0" class="table table-responsive table-striped table-hover" ><thead style="color: white;background-color: #379E8F;"><tr><td style="text-align:left;"><b>ID</b></td><td style="text-align:left;" class="col-sm-3"><b>CUSTOMER NAME</b></td><td><b>ACTION</b></td><td style="text-align:right;" class="col-sm-2"><b>EXPECTED INVOICE</b></td><td class="col-sm-2" style="text-align:right;"><b>EXPECTED DISTRIBUTION</b></td><td><b>LINK TO INVOICE</b></td></tr></thead><tbody>';
 
          
-            inlineQty = '<br></br><style>table#stockcount {font-size: 14px;text-align: center;border: none;}.dataTables_wrapper {font-size: 14px;}table#stockcount th{text-align: center;} .bolded{font-weight: bold;}</style>';
-            inlineQty += '<table id="stockcount" class="table table-responsive table-striped customer tablesorter" style="width: 100%;">';
-            inlineQty += '<thead style="color: white;background-color: #607799;">';
-            inlineQty += '<tr class="text-center">';
-            inlineQty += '</tr>';
-            inlineQty += '</thead>';
+            // inlineQty = '<br></br><style>table#stockcount {font-size: 14px;text-align: center;border: none;}.dataTables_wrapper {font-size: 14px;}table#stockcount th{text-align: center;} .bolded{font-weight: bold;}</style>';
+            // inlineQty += '<table id="stockcount" class="table table-responsive table-striped customer tablesorter" style="width: 100%;">';
+            // inlineQty += '<thead style="color: white;background-color: #607799;">';
+            // inlineQty += '<tr class="text-center">';
+            // inlineQty += '</tr>';
+            // inlineQty += '</thead>';
 
-            inlineQty += '<tbody id="stock_result" class="stock_result"></tbody>';
+            // inlineQty += '<tbody id="stock_result" class="stock_result"></tbody>';
 
-            inlineQty += '</table>';
+            // inlineQty += '</table>';
             
             // var searchedSummary = search.load({ id: 'customrecord_job', type: 'customsearch_job_invoicing_summary' });
             //var searchedSummary = search.load({ id: 'customrecord_job', type: 'customsearch_job_inv_review_exp_amt' });
@@ -545,9 +549,9 @@
 
 
                             if (old_invoice_custom == 2 || isNullorEmpty(old_invoice_custom)) {
-                                inlineQty += '<td><button type="button" id="invoice_customer" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-success active invoice_customer ">INVOICED  <span class="glyphicon glyphicon-lock"></span></button></td>';
+                                inlineQty += '<td><button type="button" id="invoice_customer" value=' + old_customer_id + ';\'yes\';' + old_sc_ID + ' onclick="" class="form-control btn btn-success active invoice_customer ">INVOICED  <span class="glyphicon glyphicon-lock"></span></button></td>';
                             } else {
-                                inlineQty += '<td><button type="button" id="invoice_customer"  onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-default invoice_customer active">CUSTOM INVOICE  <span class="glyphicon glyphicon-lock"></span></button></td>';
+                                inlineQty += '<td><button type="button" id="invoice_customer" value=' + old_customer_id + ';\'yes\';' + old_sc_ID + ' onclick="" class="form-control btn btn-default invoice_customer active">CUSTOM INVOICE  <span class="glyphicon glyphicon-lock"></span></button></td>';
                             }
                             if (roundTwoDec(total_per_customer) == roundTwoDec(old_invoice_total)) {
                                 inlineQty += '<td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td>';
@@ -567,10 +571,10 @@
                             }
                         } else if (reviewed == true) {
                             if (isNullorEmpty(old_sc_ID)) {
-                                inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align:left;">' + old_customer_name + '</p></td><td><input type="button" id="invoice_customer" value="FINALISED" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-info invoice_customer"> </td>';
+                                inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align:left;">' + old_customer_name + '</p></td><td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\';' + old_sc_ID + '" onclick="" class="form-control btn btn-info invoice_customer"><b>FINALISED</b></button></td>';
 
                             } else {
-                                inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align:left;">' + old_sc_company_name + '</p></td><td><input type="button" id="invoice_customer" value="FINALISED" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\',' + old_sc_ID + ')" class="form-control btn btn-info invoice_customer"> </td>';
+                                inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align:left;">' + old_sc_company_name + '</p></td><td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\';' + old_sc_ID + '" onclick="" class="form-control btn btn-info invoice_customer"><b>FINALISED</b></button></td>';
                             }
 
 
@@ -584,8 +588,9 @@
                                 inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align: left;">' + old_sc_company_name + '</p></td>';
                             }
 
+                            
+                            inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'' + customer_locked + '\';' + old_sc_ID + '" onclick="" class="form-control btn btn-primary invoice_customer">EDIT <span class="' + lock_class + '"></span></button></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
 
-                            inlineQty += '<td><button type="button" id="invoice_customer" value="EDIT" onclick="onclickContinueReview(' + old_customer_id + ', \'' + customer_locked + '\', ' + old_sc_ID + ')" class="form-control btn btn-primary invoice_customer">EDIT <span class="' + lock_class + '"></span></button></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
                         } else {
                             if (isNullorEmpty(old_sc_ID)) {
                                 inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align: left;">' + old_customer_name + '</p></td>';
@@ -593,7 +598,7 @@
                                 inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align: left;">' + old_sc_company_name + '</p></td>';
                             }
 
-                            inlineQty += '<td><button type="button" id="invoice_customer" value="REVIEW" onclick="onclickContinueReview(' + old_customer_id + ', \'' + customer_locked + '\', ' + old_sc_ID + ')" class="form-control btn btn-danger invoice_customer">REVIEW <span class="' + lock_class + '"></span></button> </td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
+                            inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'' + customer_locked + '\';' + old_sc_ID + '" onclick="" class="form-control btn btn-danger invoice_customer">REVIEW <span class="' + lock_class + '"></span></button> </td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
                         }
 
                         total_monthly_invoice += total_per_customer;
@@ -720,9 +725,9 @@
 
 
                                 if (old_invoice_custom == 2 || isNullorEmpty(old_invoice_custom)) {
-                                    inlineQty += '<td><button type="button" id="invoice_customer" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\')" class="form-control btn btn-success active invoice_customer ">INVOICED  <span class="glyphicon glyphicon-lock"></span></button></td>';
+                                    inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\'" onclick="" class="form-control btn btn-success active invoice_customer ">INVOICED  <span class="glyphicon glyphicon-lock"></span></button></td>';
                                 } else {
-                                    inlineQty += '<td><button type="button" id="invoice_customer"  onclick="onclickContinueReview(' + old_customer_id + ',\'yes\')" class="form-control btn btn-default invoice_customer active">CUSTOM INVOICE  <span class="glyphicon glyphicon-lock"></span></button></td>';
+                                    inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\'" onclick="" class="form-control btn btn-default invoice_customer active">CUSTOM INVOICE  <span class="glyphicon glyphicon-lock"></span></button></td>';
                                 }
                                 if (roundTwoDec(total_per_customer) == roundTwoDec(old_invoice_total)) {
                                     inlineQty += '<td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td>';
@@ -742,12 +747,13 @@
                                 }
                             } else if (reviewed == true) {
                                 if (isNullorEmpty(old_sc_ID)) {
-                                    inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align:left;">' + old_customer_name + '</p></td><td><input type="button" id="invoice_customer" value="FINALISED" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-info invoice_customer"> </td>';
+                                    inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align:left;">' + old_customer_name + '</p></td><td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\';' + old_sc_ID + '" onclick="" class="form-control btn btn-info invoice_customer"><b>FINALISED  </b></button></td>';
 
                                 } else {
-                                    inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align:left;">' + old_sc_company_name + '</p></td><td><input type="button" id="invoice_customer" value="FINALISED" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-info invoice_customer"> </td>';
+                                    inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align:left;">' + old_sc_company_name + '</p></td><td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\';' + old_sc_ID + '" onclick="" class="form-control btn btn-info invoice_customer"><b>FINALISED  </b></button></td>';
                                 }
 
+                                
 
                                 inlineQty += '<td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
 
@@ -760,7 +766,7 @@
                                 }
 
 
-                                inlineQty += '<td><button type="button" id="invoice_customer" value="EDIT" onclick="onclickContinueReview(' + old_customer_id + ', \'' + customer_locked + '\', ' + old_sc_ID + ')" class="form-control btn btn-primary invoice_customer">EDIT <span class="' + lock_class + '"></span></button></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
+                                inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'' + customer_locked + '\';' + old_sc_ID + '" onclick="" class="form-control btn btn-primary invoice_customer">EDIT <span class="' + lock_class + '"></span></button></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
                             } else {
                                 if (isNullorEmpty(old_sc_ID)) {
                                     inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align: left;">' + old_customer_name + '</p></td>';
@@ -768,7 +774,7 @@
                                     inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align: left;">' + old_sc_company_name + '</p></td>';
                                 }
 
-                                inlineQty += '<td><button type="button" id="invoice_customer" value="REVIEW" onclick="onclickContinueReview(' + old_customer_id + ', \'' + customer_locked + '\', ' + old_sc_ID + ')" class="form-control btn btn-danger invoice_customer">REVIEW <span class="' + lock_class + '"></span></button> </td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
+                                inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'' + customer_locked + '\';' + old_sc_ID + '" onclick="" class="form-control btn btn-danger invoice_customer">REVIEW <span class="' + lock_class + '"></span></button> </td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
                             }
 
                             total_monthly_invoice += total_per_customer;
@@ -1133,9 +1139,9 @@
 
 
                     if (old_invoice_custom == 2 || isNullorEmpty(old_invoice_custom)) {
-                        inlineQty += '<td><button type="button" id="invoice_customer" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-success active invoice_customer ">INVOICED  <span class="glyphicon glyphicon-lock"></span></button></td>';
+                        inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\';' + old_sc_ID + '" onclick="" class="form-control btn btn-success active invoice_customer ">INVOICED  <span class="glyphicon glyphicon-lock"></span></button></td>';
                     } else {
-                        inlineQty += '<td><button type="button" id="invoice_customer"  onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-default invoice_customer active">CUSTOM INVOICE  <span class="glyphicon glyphicon-lock"></span></button></td>';
+                        inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'yes\';' + old_sc_ID + '" onclick="" class="form-control btn btn-default invoice_customer active">CUSTOM INVOICE  <span class="glyphicon glyphicon-lock"></span></button></td>';
                     }
                     if (roundTwoDec(total_per_customer) == roundTwoDec(old_invoice_total)) {
                         inlineQty += '<td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" style="text-align:right;" class="form-control total_monthly_invoice" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td>';
@@ -1155,10 +1161,14 @@
                     }
                 } else if (reviewed == true) {
                     if (isNullorEmpty(old_sc_ID)) {
-                        inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align:left;">' + old_customer_name + '</p></td><td><input type="button" id="invoice_customer" value="FINALISED" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-info invoice_customer"> </td>';
+                        inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align:left;">' + old_customer_name + '</p></td><td><button type="button" id="invoice_customer" value="' + old_customer_id + ',\'yes\', ' + old_sc_ID + '" onclick="" class="form-control btn btn-info invoice_customer"><b>FINALISED  </b></button></td>';
+
+                        
 
                     } else {
-                        inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align:left;">' + old_sc_company_name + '</p></td><td><input type="button" id="invoice_customer" value="FINALISED" onclick="onclickContinueReview(' + old_customer_id + ',\'yes\', ' + old_sc_ID + ')" class="form-control btn btn-info invoice_customer"> </td>';
+                        inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align:left;">' + old_sc_company_name + '</p></td><td><button type="button" id="invoice_customer" value="' + old_customer_id + ',\'yes\', ' + old_sc_ID + '" onclick="" class="form-control btn btn-info invoice_customer"><b>FINALISED  </b></button></td>';
+
+                        
                     }
 
 
@@ -1173,7 +1183,7 @@
                     }
 
 
-                    inlineQty += '<td><button type="button" id="invoice_customer" value="EDIT" onclick="onclickContinueReview(' + old_customer_id + ', \'' + customer_locked + '\', ' + old_sc_ID + ')" class="form-control btn btn-primary invoice_customer">EDIT <span class="' + lock_class + '"></span></button></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
+                    inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'' + customer_locked + '\';' + old_sc_ID + '" onclick="" class="form-control btn btn-primary invoice_customer">EDIT <span class="' + lock_class + '"></span></button></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
                 } else {
                     if (isNullorEmpty(old_sc_ID)) {
                         inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_customer_id + '" target="_blank"><p style="text-align:left;">' + old_ID + '</p></a></td><td><p style="text-align: left;">' + old_customer_name + '</p></td>';
@@ -1181,7 +1191,7 @@
                         inlineQty += '<tr><td><a href="' + baseURL + '/app/common/entity/custjob.nl?id=' + old_sc_ID + '" target="_blank"><p style="text-align:left;">' + old_sc_entity_id + '</p></a></td><td><p style="text-align: left;">' + old_sc_company_name + '</p></td>';
                     }
 
-                    inlineQty += '<td><button type="button" id="invoice_customer" value="REVIEW" onclick="onclickContinueReview(' + old_customer_id + ', \'' + customer_locked + '\', ' + old_sc_ID + ')" class="form-control btn btn-danger invoice_customer">REVIEW <span class="' + lock_class + '"></span></button> </td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
+                    inlineQty += '<td><button type="button" id="invoice_customer" value="' + old_customer_id + ';\'' + customer_locked + '\';' + old_sc_ID + '" onclick="" class="form-control btn btn-danger invoice_customer">REVIEW <span class="' + lock_class + '"></span></button> </td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_per_customer).toFixed(2) + '" readonly /></div></td><td><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" style="text-align:right;" value="' + (total_comm_per_customer).toFixed(2) + '" readonly /></div></td><td>' + old_invoice_id + '</td></tr>';
                 }
                 total_monthly_invoice += total_per_customer;
                 total_monthly_comm += total_comm_per_customer;
@@ -1195,7 +1205,7 @@
 
             inlinehtml2 += '<br/><label>Total Exp Invoice Amount</label><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_invoice" value="' + (total_monthly_invoice).toFixed(2) + '" readonly /></div>';
             inlinehtml2 += '<label>Total Exp Distribution Amount</label><div class="input-group"><span class="input-group-addon">$</span><input type="number" class="form-control total_monthly_comm" value="' + (total_monthly_comm).toFixed(2) + '" readonly /></div>';
-            inlinehtml2 += '<div><button type="button" id="dailyrevenue" value="DAILY REVENUE" class="form-control btn btn-primary" style="margin-top: 10px">Daily Revenue</button></div>';
+            inlinehtml2 += '<div><button type="button" id="dailyrevenue" value="DAILY REVENUE" class="form-control btn btn-primary" style="margin-top: 10px; background-color: #379E8F">Daily Revenue</button></div>';
 
             var edit_progress = 0.0;
             var remaining_progress = 0.0;
@@ -1223,8 +1233,6 @@
                 id: 'custpage_html2',
                 label: 'inlinehtml',
                 type: ui.FieldType.INLINEHTML
-            }).updateBreakType({
-                breakType: ui.FieldLayoutType.STARTROW
             }).updateLayoutType({
                 layoutType: ui.FieldLayoutType.OUTSIDEABOVE,
                 padding: 1
@@ -1234,11 +1242,6 @@
                 id: 'preview_table',
                 label: 'preview_table',
                 type: ui.FieldType.INLINEHTML
-            }).updateBreakType({
-                breakType: ui.FieldLayoutType.STARTROW
-            }).updateLayoutType({
-                layoutType: ui.FieldLayoutType.OUTSIDEBELOW,
-                padding: 1
             }).defaultValue = inlineQty;
 
             form.addField({ 
@@ -1285,7 +1288,7 @@
                 form.addButton({ id: 'run_finalise', label: 'RUN FINALISE SCRIPT', functionName: 'onclick_Finalise()' });
             }
 
-            form.clientScriptFileId = 4736989; //4736989; // SB = 4736989
+            form.clientScriptFileId = 4798851; //4736989; // SB = 4736989
 
             context.response.writePage(form);
             var end_time = Date.now();
