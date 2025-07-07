@@ -15,8 +15,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
 
         var usage_threshold = 30; //20
         var usage_threshold_invoice = 1000; //1000
-        // var adhoc_inv_deploy = 'customdeploy2';
-        var adhoc_inv_deploy = 'customdeploy_ss_invoice_creation_2';
+        var adhoc_inv_deploy = 'customdeploy2';
         var prev_inv_deploy = null;
         var ctx = runtime.getCurrentScript();
 
@@ -56,14 +55,9 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
             log.audit({ title: 'Customer', details: ctx.getParameter({name: 'custscript_customer_id' })});
             log.audit({ title: 'Invoice', details: ctx.getParameter({name: 'custscript_invoiceid' })});
 
-            // if (isNullorEmpty(ctx.getParameter({name: 'custscript_customer_id' })) && isNullorEmpty(ctx.getParameter({name: 'custscript_invoiceid' }))) {
-            if ( customer_id == 1279281){ // Test - Test Westraya Customer
+            if (isNullorEmpty(ctx.getParameter({name: 'custscript_customer_id' })) && isNullorEmpty(ctx.getParameter({name: 'custscript_invoiceid' }))) {
 
                 // nlapiLogExecution('DEBUG', 'START ---> ', ctx.getRemainingUsage());
-                log.debug({
-                    title: 'START ---> ',
-                    details: ctx.getRemainingUsage()
-                })
         
                 var searched_summary = search.load({
                     id: 'customsearch_job_inv_process_customer',
@@ -265,13 +259,7 @@ define(['N/runtime', 'N/search', 'N/record', 'N/log', 'N/task', 'N/currentRecord
                                     recInvoice.setValue({ fieldId: 'department', value: record.load({ type: record.Type.PARTNER, id: franchisee }).getValue({ fieldId: 'department' }) });
                                     recInvoice.setValue({ fieldId: 'location', value: record.load({ type: record.Type.PARTNER, id: franchisee }).getValue({ fieldId: 'location' }) });
                                     // recInvoice.setValue({ fieldId: 'trandate', value: invoice_date() });
-
-                                    /**
-                                     * BRUH WHY THOU?
-                                     */
-                                    // recInvoice.setValue({ fieldId: 'trandate', value: '31/01/2021' });
-                                    
-                                    
+                                    recInvoice.setValue({ fieldId: 'trandate', value: '31/07/2021' });
                                     recInvoice.setValue({ fieldId: 'custbody_dont_update_trandate', value: "T" });
                                     recInvoice.setValue({ fieldId: 'custbody_inv_date_range_from', value: service_start_date });
                                     recInvoice.setValue({ fieldId: 'custbody_inv_date_range_to', value: service_end_date });
